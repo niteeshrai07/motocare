@@ -1,4 +1,5 @@
 const { body } = require('express-validator');
+const { phoneValidator } = require('./common.validator');
 
 const registerValidator = [
   body('name').trim().notEmpty().withMessage('Name is required'),
@@ -14,7 +15,7 @@ const registerValidator = [
     .bail()
     .isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
 
-  body('phone').trim().notEmpty().withMessage('Phone number is required'),
+  phoneValidator(),
 
   body('role')
     .notEmpty().withMessage('Role is required')

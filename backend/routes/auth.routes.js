@@ -10,4 +10,5 @@ router.post('/register', registerValidator, handleValidationErrors, register);
 router.post('/login', loginValidator, handleValidationErrors, login);
 router.get('/me', verifyToken, getCurrentUser);
 
+
 module.exports = router;
