@@ -178,7 +178,7 @@ const updateMyRepairShop = async (req, res) => {
       });
     }
 
-    const updates = buildUpdateRepairShopData(req.body);
+    const updates = buildUpdateRepairShopData(req.body ?? {});
 
     if (Object.keys(updates).length === 0) {
       return res.status(400).json({

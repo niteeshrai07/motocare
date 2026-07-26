@@ -3,6 +3,8 @@ const cors = require('cors');
 
 const authRoutes = require('./routes/auth.routes');
 const repairShopRoutes = require('./routes/repairShop.routes');
+const serviceRequestRoutes = require('./routes/serviceRequest.routes');
+
 
 const app = express();
 
@@ -23,5 +25,6 @@ app.get('/', (req, res) => {
 // Routes
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/repair-shops', repairShopRoutes);
+app.use('/api/v1/service-requests', serviceRequestRoutes);
 
 module.exports = app;
