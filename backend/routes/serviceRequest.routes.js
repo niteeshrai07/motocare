@@ -12,10 +12,15 @@ const {
   rejectServiceRequestValidator,
   startServiceRequestValidator,
   completeServiceRequestValidator,
+  listServiceRequestsValidator,
+  getServiceRequestByIdValidator,
 } = require('../validators/serviceRequest.validator');
 
 const {
   createServiceRequest,
+  getMyServiceRequests,
+  getShopServiceRequests,
+  getServiceRequestById,
   acceptServiceRequest,
   cancelServiceRequest,
   quoteServiceRequest,
@@ -24,7 +29,6 @@ const {
   completeServiceRequest,
 } = require('../controllers/serviceRequest.controller');
 
-// Customer routes
 router.post(
   '/',
   verifyToken,
@@ -32,6 +36,32 @@ router.post(
   createServiceRequestValidator,
   handleValidationErrors,
   createServiceRequest
+);
+
+router.get(
+  '/my',
+  verifyToken,
+  authorizeRoles('customer'),
+  listServiceRequestsValidator,
+  handleValidationErrors,
+  getMyServiceRequests
+);
+
+router.get(
+  '/shop',
+  verifyToken,
+  authorizeRoles('mechanic'),
+  listServiceRequestsValidator,
+  handleValidationErrors,
+  getShopServiceRequests
+);
+
+router.get(
+  '/:id',
+  verifyToken,
+  getServiceRequestByIdValidator,
+  handleValidationErrors,
+  getServiceRequestById
 );
 
 router.patch(
@@ -52,7 +82,6 @@ router.patch(
   cancelServiceRequest
 );
 
-// Mechanic routes
 router.patch(
   '/:id/quote',
   verifyToken,
@@ -88,5 +117,4 @@ router.patch(
   handleValidationErrors,
   completeServiceRequest
 );
-
 module.exports = router;

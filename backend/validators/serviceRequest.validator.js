@@ -1,6 +1,7 @@
-const { body, param } = require('express-validator');
+const { body, param, query } = require('express-validator');
+const ServiceRequest = require('../models/serviceRequest.model');
 
-const getServiceRequestByIdValidator = () => [
+const getServiceRequestByIdValidator = [
   param('id')
     .isMongoId()
     .withMessage('Invalid service request ID format'),
@@ -62,7 +63,7 @@ const createServiceRequestValidator = [
 ];
 
 const quoteServiceRequestValidator = [
-  ...getServiceRequestByIdValidator(),
+  ...getServiceRequestByIdValidator,
 
   body('estimatedCost')
     .notEmpty().withMessage('estimatedCost is required')
@@ -85,7 +86,7 @@ const quoteServiceRequestValidator = [
 ];
 
 const rejectServiceRequestValidator = [
-  ...getServiceRequestByIdValidator(),
+  ...getServiceRequestByIdValidator,
 
   body('mechanicNotes')
     .optional()
@@ -94,13 +95,31 @@ const rejectServiceRequestValidator = [
     .withMessage('mechanicNotes must be under 500 characters'),
 ];
 
-const acceptServiceRequestValidator = [...getServiceRequestByIdValidator()];
+const acceptServiceRequestValidator = [...getServiceRequestByIdValidator];
+const cancelServiceRequestValidator = [...getServiceRequestByIdValidator];
+const startServiceRequestValidator = [...getServiceRequestByIdValidator];
+const completeServiceRequestValidator = [...getServiceRequestByIdValidator];
 
-const cancelServiceRequestValidator = [...getServiceRequestByIdValidator()];
+const MAX_LIMIT = 50;
 
-const startServiceRequestValidator = [...getServiceRequestByIdValidator()];
+const listServiceRequestsValidator = [
+  query('status')
+    .optional()
+    .isIn(ServiceRequest.SERVICE_REQUEST_STATUSES)
+    .withMessage(`status must be one of: ${ServiceRequest.SERVICE_REQUEST_STATUSES.join(', ')}`),
 
-const completeServiceRequestValidator = [...getServiceRequestByIdValidator()];
+  query('page')
+    .optional()
+    .isInt({ min: 1 })
+    .withMessage('page must be a positive integer')
+    .toInt(),
+
+  query('limit')
+    .optional()
+    .isInt({ min: 1, max: MAX_LIMIT })
+    .withMessage(`limit must be between 1 and ${MAX_LIMIT}`)
+    .toInt(),
+];
 
 module.exports = {
   getServiceRequestByIdValidator,
@@ -111,4 +130,5 @@ module.exports = {
   cancelServiceRequestValidator,
   startServiceRequestValidator,
   completeServiceRequestValidator,
+  listServiceRequestsValidator,
 };

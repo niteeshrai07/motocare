@@ -7,16 +7,21 @@ const {
 
 const EXPIRABLE_STATUSES = ['pending', 'quoted'];
 const ACTIVE_REQUEST_STATUSES = ['pending', 'quoted', 'accepted', 'in_progress'];
+const CUSTOMER_POPULATE_FIELDS = 'name phone';
+const SHOP_POPULATE_FIELDS = 'shopName phone ownerId status';
+const CONTACT_VISIBLE_STATUSES = ['accepted', 'in_progress', 'completed'];
+const DEFAULT_PAGE = 1;
+const DEFAULT_LIMIT = 20;
 
 const SERVICE_REQUEST_UPDATE_UNAUTHORIZED_MESSAGE =
   'You are not authorized to update this service request';
-
-const CANCELLABLE_STATUSES = ['pending', 'quoted'];
+const SERVICE_REQUEST_ACCESS_UNAUTHORIZED_MESSAGE =
+  'You are not authorized to access this service request';
 
 const loadServiceRequest = async (id) => {
   return ServiceRequest.findById(id)
-    .populate('customerId', 'name phone')
-    .populate('shopId', 'shopName phone ownerId status');
+    .populate('customerId', CUSTOMER_POPULATE_FIELDS)
+    .populate('shopId', SHOP_POPULATE_FIELDS);
 };
 
 const loadRepairShop = async (id) => {
@@ -33,6 +38,30 @@ const applyLazyExpiration = async (request) => {
   }
 
   return request;
+};
+
+const mapServiceRequest = (request) => {
+  return CONTACT_VISIBLE_STATUSES.includes(request.status)
+    ? buildServiceRequestResponseWithContact(request)
+    : buildServiceRequestResponse(request);
+};
+
+const paginateServiceRequests = async (filter, { page, limit }) => {
+  const total = await ServiceRequest.countDocuments(filter);
+  const totalPages = Math.ceil(total / limit);
+
+  const requests = await ServiceRequest.find(filter)
+    .populate('customerId', CUSTOMER_POPULATE_FIELDS)
+    .populate('shopId', SHOP_POPULATE_FIELDS)
+    .skip((page - 1) * limit)
+    .limit(limit);
+
+  const currentRequests = await Promise.all(requests.map(applyLazyExpiration));
+
+  return {
+    data: currentRequests.map(mapServiceRequest),
+    pagination: { page, limit, total, totalPages },
+  };
 };
 
 const DEFAULT_SERVICE_REQUEST_TIMEOUT_MINUTES = 60;
@@ -129,7 +158,7 @@ const QUOTABLE_STATUSES = ['pending'];
 
 const quoteServiceRequest = async (req, res) => {
   try {
-    const { estimatedCost, estimatedDuration, mechanicNotes } = req.body;
+    const { estimatedCost, estimatedDuration, mechanicNotes } = req.body ?? {};
 
     let request = await loadServiceRequest(req.params.id);
 
@@ -354,6 +383,8 @@ const acceptServiceRequest = async (req, res) => {
   }
 };
 
+const CANCELLABLE_STATUSES = ['pending', 'quoted'];
+
 const cancelServiceRequest = async (req, res) => {
   try {
     let request = await loadServiceRequest(req.params.id);
@@ -566,6 +597,118 @@ const completeServiceRequest = async (req, res) => {
   }
 };
 
+const getMyServiceRequests = async (req, res) => {
+  try {
+    const { status, page = DEFAULT_PAGE, limit = DEFAULT_LIMIT } = req.query;
+
+    const filter = {
+      customerId: req.user._id,
+      ...(status && { status }),
+    };
+
+    const { data, pagination } = await paginateServiceRequests(filter, { page, limit });
+
+    return res.status(200).json({
+      success: true,
+      message: 'Service requests fetched successfully',
+      data: { serviceRequests: data, pagination },
+      errors: null,
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({
+      success: false,
+      message: 'Something went wrong while fetching your service requests',
+      data: null,
+      errors: null,
+    });
+  }
+};
+
+const getShopServiceRequests = async (req, res) => {
+  try {
+    const shop = await RepairShop.findOne({ ownerId: req.user._id });
+
+    if (!shop) {
+      return res.status(404).json({
+        success: false,
+        message: 'You have not created a repair shop yet',
+        data: null,
+        errors: null,
+      });
+    }
+
+    const { status, page = DEFAULT_PAGE, limit = DEFAULT_LIMIT } = req.query;
+
+    const filter = {
+      shopId: shop._id,
+      ...(status && { status }),
+    };
+
+    const { data, pagination } = await paginateServiceRequests(filter, { page, limit });
+
+    return res.status(200).json({
+      success: true,
+      message: 'Service requests fetched successfully',
+      data: { serviceRequests: data, pagination },
+      errors: null,
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({
+      success: false,
+      message: 'Something went wrong while fetching shop service requests',
+      data: null,
+      errors: null,
+    });
+  }
+};
+
+const getServiceRequestById = async (req, res) => {
+  try {
+    let request = await loadServiceRequest(req.params.id);
+
+    if (!request) {
+      return res.status(404).json({
+        success: false,
+        message: 'Service request not found',
+        data: null,
+        errors: null,
+      });
+    }
+
+    request = await applyLazyExpiration(request);
+
+    const isOwningCustomer = request.customerId._id.toString() === req.user._id.toString();
+    const isOwningMechanic = request.shopId.ownerId.toString() === req.user._id.toString();
+    const isAdmin = req.user.role === 'admin';
+
+    if (!isOwningCustomer && !isOwningMechanic && !isAdmin) {
+      return res.status(403).json({
+        success: false,
+        message: SERVICE_REQUEST_ACCESS_UNAUTHORIZED_MESSAGE,
+        data: null,
+        errors: null,
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: 'Service request fetched successfully',
+      data: { serviceRequest: mapServiceRequest(request) },
+      errors: null,
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({
+      success: false,
+      message: 'Something went wrong while fetching the service request',
+      data: null,
+      errors: null,
+    });
+  }
+};
+
 module.exports = {
   createServiceRequest,
   quoteServiceRequest,
@@ -574,4 +717,7 @@ module.exports = {
   cancelServiceRequest,
   startServiceRequest,
   completeServiceRequest,
+  getMyServiceRequests,
+  getShopServiceRequests,
+  getServiceRequestById,
 };
