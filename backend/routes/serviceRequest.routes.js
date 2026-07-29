@@ -14,6 +14,8 @@ const {
   completeServiceRequestValidator,
   listServiceRequestsValidator,
   getServiceRequestByIdValidator,
+  createReviewValidator,
+  updateReviewValidator,
 } = require('../validators/serviceRequest.validator');
 
 const {
@@ -27,6 +29,10 @@ const {
   rejectServiceRequest,
   startServiceRequest,
   completeServiceRequest,
+  createReview,
+  getReview,
+  updateReview,
+  deleteReview,
 } = require('../controllers/serviceRequest.controller');
 
 router.post(
@@ -54,6 +60,41 @@ router.get(
   listServiceRequestsValidator,
   handleValidationErrors,
   getShopServiceRequests
+);
+
+router.post(
+  '/:id/review',
+  verifyToken,
+  authorizeRoles('customer'),
+  getServiceRequestByIdValidator,
+  createReviewValidator,
+  handleValidationErrors,
+  createReview
+);
+
+router.get(
+  '/:id/review',
+  verifyToken,
+  getServiceRequestByIdValidator,
+  handleValidationErrors,
+  getReview
+);
+
+router.patch(
+  '/:id/review',
+  verifyToken,
+  getServiceRequestByIdValidator,
+  updateReviewValidator,
+  handleValidationErrors,
+  updateReview
+);
+
+router.delete(
+  '/:id/review',
+  verifyToken,
+  getServiceRequestByIdValidator,
+  handleValidationErrors,
+  deleteReview
 );
 
 router.get(

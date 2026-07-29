@@ -9,6 +9,7 @@ const {
   getRepairShopById,
   listRepairShops,
   verifyRepairShop,
+  listShopReviews,
 } = require('../controllers/repairShop.controller');
 
 const {
@@ -16,8 +17,10 @@ const {
   updateRepairShopValidator,
   nearbyShopsValidator,
   getRepairShopByIdValidator,
+  getShopIdValidator,
   listRepairShopsValidator,
   verifyRepairShopStatusValidator,
+  listShopReviewsValidator,
 } = require('../validators/repairShop.validator');
 
 const handleValidationErrors = require('../middleware/validation.middleware');
@@ -57,6 +60,9 @@ router.patch(
   handleValidationErrors,
   verifyRepairShop
 );
+
+// Public (parameterized — must come after /me, /nearby)
+router.get('/:shopId/reviews', getShopIdValidator, listShopReviewsValidator, handleValidationErrors, listShopReviews);
 
 // Public (parameterized — must come after /me, /nearby)
 router.get('/:id', getRepairShopByIdValidator, handleValidationErrors, getRepairShopById);

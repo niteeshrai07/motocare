@@ -1,9 +1,11 @@
 const RepairShop = require('../models/repairShop.model');
+const Review = require('../models/review.model');
 const {
   buildMechanicRepairShopResponse,
   buildPublicRepairShopResponse,
   buildAdminRepairShopResponse,
 } = require('../mappers/repairShop.mapper');
+const { buildReviewListItem } = require('../mappers/review.mapper');
 
 const DUPLICATE_SHOP_MESSAGE = 'You already have a repair shop';
 const SHOP_NOT_FOUND_MESSAGE = 'You have not created a repair shop yet';
@@ -12,6 +14,9 @@ const DEFAULT_RADIUS_KM = 10;
 const MAX_RADIUS_KM = 50;
 const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 20;
+
+const DEFAULT_REVIEW_PAGE = 1;
+const DEFAULT_REVIEW_LIMIT = 20;
 
 const buildCreateRepairShopData = (body) => {
   return {
@@ -389,6 +394,60 @@ const verifyRepairShop = async (req, res) => {
   }
 };
 
+const REVIEW_SORT_MAP = {
+  newest: { createdAt: -1 },
+  highest: { rating: -1, createdAt: -1 },
+  lowest: { rating: 1, createdAt: -1 },
+};
+
+const listShopReviews = async (req, res) => {
+  try {
+    const shop = await RepairShop.findById(req.params.shopId);
+
+    if (!shop || shop.status !== 'verified') {
+      return res.status(404).json({
+        success: false,
+        message: 'Repair shop not found',
+        data: null,
+        errors: null,
+      });
+    }
+
+    const { page = DEFAULT_REVIEW_PAGE, limit = DEFAULT_REVIEW_LIMIT, sort = 'newest' } = req.query;
+
+    const total = await Review.countDocuments({ shopId: shop._id });
+    const totalPages = Math.ceil(total / limit);
+
+    // totalPages = 0 when total = 0 is intentional and consistent with
+    // pagination behavior in the existing service request module.
+
+    const reviews = await Review.find({ shopId: shop._id })
+      .populate('customerId', 'name')
+      .populate('shopId', 'shopName')
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .sort(REVIEW_SORT_MAP[sort]);
+
+    return res.status(200).json({
+      success: true,
+      message: 'Reviews fetched successfully',
+      data: {
+        reviews: reviews.map(buildReviewListItem),
+        pagination: { page, limit, total, totalPages },
+      },
+      errors: null,
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({
+      success: false,
+      message: 'Something went wrong while fetching reviews',
+      data: null,
+      errors: null,
+    });
+  }
+};
+
 module.exports = {
   createRepairShop,
   getMyRepairShop,
@@ -397,4 +456,5 @@ module.exports = {
   getRepairShopById,
   listRepairShops,
   verifyRepairShop,
+  listShopReviews,
 };

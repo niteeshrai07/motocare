@@ -121,6 +121,31 @@ const listServiceRequestsValidator = [
     .toInt(),
 ];
 
+const MAX_REVIEW_LIMIT = 50;
+
+const createReviewValidator = [
+  body('rating')
+    .notEmpty().withMessage('rating is required')
+    .bail()
+    .isInt({ min: 1, max: 5 }).withMessage('rating must be an integer between 1 and 5'),
+
+  body('comment')
+    .optional()
+    .trim()
+    .isLength({ max: 500 }).withMessage('comment must be under 500 characters'),
+];
+
+const updateReviewValidator = [
+  body('rating')
+    .optional()
+    .isInt({ min: 1, max: 5 }).withMessage('rating must be an integer between 1 and 5'),
+
+  body('comment')
+    .optional()
+    .trim()
+    .isLength({ max: 500 }).withMessage('comment must be under 500 characters'),
+];
+
 module.exports = {
   getServiceRequestByIdValidator,
   createServiceRequestValidator,
@@ -131,4 +156,6 @@ module.exports = {
   startServiceRequestValidator,
   completeServiceRequestValidator,
   listServiceRequestsValidator,
+  createReviewValidator,
+  updateReviewValidator,
 };

@@ -206,6 +206,12 @@ const getRepairShopByIdValidator = [
     .withMessage('Invalid repair shop ID format'),
 ];
 
+const getShopIdValidator = [
+  param('shopId')
+    .isMongoId()
+    .withMessage('Invalid shop ID format'),
+];
+
 const listRepairShopsValidator = [
   query('status')
     .optional()
@@ -229,11 +235,31 @@ const verifyRepairShopStatusValidator = [
     .withMessage('status must be either "verified" or "rejected"'),
 ];
 
+const MAX_REVIEW_LIMIT = 50;
+
+const listShopReviewsValidator = [
+  query('page')
+    .optional()
+    .isInt({ min: 1 }).withMessage('page must be a positive integer')
+    .toInt(),
+
+  query('limit')
+    .optional()
+    .isInt({ min: 1, max: MAX_REVIEW_LIMIT }).withMessage(`limit must be between 1 and ${MAX_REVIEW_LIMIT}`)
+    .toInt(),
+
+  query('sort')
+    .optional()
+    .isIn(['newest', 'highest', 'lowest']).withMessage('sort must be one of newest, highest, or lowest'),
+];
+
 module.exports = {
   createRepairShopValidator,
   updateRepairShopValidator,
   nearbyShopsValidator,
   getRepairShopByIdValidator,
+  getShopIdValidator,
   listRepairShopsValidator,
   verifyRepairShopStatusValidator,
+  listShopReviewsValidator,
 };
