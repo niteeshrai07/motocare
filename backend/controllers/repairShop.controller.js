@@ -1,5 +1,6 @@
 const RepairShop = require('../models/repairShop.model');
 const Review = require('../models/review.model');
+const { createNotification } = require('../utils/notification.util');
 const {
   buildMechanicRepairShopResponse,
   buildPublicRepairShopResponse,
@@ -374,6 +375,24 @@ const verifyRepairShop = async (req, res) => {
 
     shop.status = status;
     await shop.save();
+
+    const notificationType = status === 'verified' ? 'shop_verified' : 'shop_rejected';
+    const notificationTitle =
+      status === 'verified' ? 'Shop Verified' : 'Shop Rejected';
+    const notificationMessage =
+      status === 'verified'
+        ? 'Your repair shop has been verified'
+        : 'Your repair shop has been rejected';
+
+    await createNotification({
+      recipientId: shop.ownerId._id,
+      type: notificationType,
+      title: notificationTitle,
+      message: notificationMessage,
+      resourceType: 'repair-shop',
+      resourceId: shop._id,
+      metadata: { status },
+    });
 
     return res.status(200).json({
       success: true,

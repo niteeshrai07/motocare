@@ -2,6 +2,7 @@ const ServiceRequest = require('../models/serviceRequest.model');
 const RepairShop = require('../models/repairShop.model');
 const Review = require('../models/review.model');
 const { recalculateShopRating } = require('../utils/rating.util');
+const { createNotification } = require('../utils/notification.util');
 const {
   buildServiceRequestResponse,
   buildServiceRequestResponseWithContact,
@@ -152,6 +153,16 @@ const createServiceRequest = async (req, res) => {
 
     await request.save();
 
+    await createNotification({
+      recipientId: shop.ownerId,
+      type: 'service_request_submitted',
+      title: 'New Service Request',
+      message: 'You have received a new service request',
+      resourceType: 'service-request',
+      resourceId: request._id,
+      metadata: { customerId: req.user._id.toString() },
+    });
+
     const populatedRequest = await loadServiceRequest(request._id);
 
     return res.status(201).json({
@@ -241,6 +252,16 @@ const quoteServiceRequest = async (req, res) => {
 
     await request.save();
 
+    await createNotification({
+      recipientId: request.customerId._id,
+      type: 'quote_received',
+      title: 'New Quote Received',
+      message: 'A mechanic has quoted on your service request',
+      resourceType: 'service-request',
+      resourceId: request._id,
+      metadata: { shopId: shop._id.toString() },
+    });
+
     return res.status(200).json({
       success: true,
       message: 'Service request quoted successfully',
@@ -325,6 +346,16 @@ const rejectServiceRequest = async (req, res) => {
 
     await request.save();
 
+    await createNotification({
+      recipientId: request.customerId._id,
+      type: 'quote_rejected',
+      title: 'Quote Rejected',
+      message: 'Your service request quote was rejected',
+      resourceType: 'service-request',
+      resourceId: request._id,
+      metadata: { shopId: shop._id.toString() },
+    });
+
     return res.status(200).json({
       success: true,
       message: 'Service request rejected successfully',
@@ -382,6 +413,16 @@ const acceptServiceRequest = async (req, res) => {
     request.status = 'accepted';
 
     await request.save();
+
+    await createNotification({
+      recipientId: request.shopId.ownerId,
+      type: 'quote_accepted',
+      title: 'Quote Accepted',
+      message: 'A customer accepted your quote',
+      resourceType: 'service-request',
+      resourceId: request._id,
+      metadata: { customerId: request.customerId._id.toString() },
+    });
 
     return res.status(200).json({
       success: true,
@@ -519,6 +560,16 @@ const startServiceRequest = async (req, res) => {
 
     await request.save();
 
+    await createNotification({
+      recipientId: request.customerId._id,
+      type: 'service_started',
+      title: 'Service Started',
+      message: 'Your repair shop has started working on your request',
+      resourceType: 'service-request',
+      resourceId: request._id,
+      metadata: { shopId: shop._id.toString() },
+    });
+
     return res.status(200).json({
       success: true,
       message: 'Service request started successfully',
@@ -596,6 +647,16 @@ const completeServiceRequest = async (req, res) => {
     request.status = 'completed';
 
     await request.save();
+
+    await createNotification({
+      recipientId: request.customerId._id,
+      type: 'service_completed',
+      title: 'Service Completed',
+      message: 'Your service request has been marked as completed',
+      resourceType: 'service-request',
+      resourceId: request._id,
+      metadata: { shopId: shop._id.toString() },
+    });
 
     return res.status(200).json({
       success: true,
@@ -780,6 +841,16 @@ const createReview = async (req, res) => {
     });
 
     await recalculateShopRating(serviceRequest.shopId._id);
+
+    await createNotification({
+      recipientId: serviceRequest.shopId.ownerId,
+      type: 'review_received',
+      title: 'New Review Received',
+      message: 'You received a new review for your repair shop',
+      resourceType: 'review',
+      resourceId: review._id,
+      metadata: { customerId: req.user._id.toString(), rating },
+    });
 
     const populatedReview = await Review.findById(review._id)
       .populate('customerId', 'name')
