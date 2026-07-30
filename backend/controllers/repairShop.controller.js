@@ -358,11 +358,42 @@ const listRepairShops = async (req, res) => {
   }
 };
 
+const performShopStatusUpdate = async (shopId, status) => {
+  const shop = await RepairShop.findById(shopId).populate('ownerId');
+
+  if (!shop) {
+    return null;
+  }
+
+  shop.status = status;
+  await shop.save();
+
+  const notificationType = status === 'verified' ? 'shop_verified' : 'shop_rejected';
+  const notificationTitle =
+    status === 'verified' ? 'Shop Verified' : 'Shop Rejected';
+  const notificationMessage =
+    status === 'verified'
+      ? 'Your repair shop has been verified'
+      : 'Your repair shop has been rejected';
+
+  await createNotification({
+    recipientId: shop.ownerId._id,
+    type: notificationType,
+    title: notificationTitle,
+    message: notificationMessage,
+    resourceType: 'repair-shop',
+    resourceId: shop._id,
+    metadata: { status },
+  });
+
+  return shop;
+};
+
 const verifyRepairShop = async (req, res) => {
   try {
     const { status } = req.body;
 
-    const shop = await RepairShop.findById(req.params.id).populate('ownerId');
+    const shop = await performShopStatusUpdate(req.params.id, status);
 
     if (!shop) {
       return res.status(404).json({
@@ -372,27 +403,6 @@ const verifyRepairShop = async (req, res) => {
         errors: null,
       });
     }
-
-    shop.status = status;
-    await shop.save();
-
-    const notificationType = status === 'verified' ? 'shop_verified' : 'shop_rejected';
-    const notificationTitle =
-      status === 'verified' ? 'Shop Verified' : 'Shop Rejected';
-    const notificationMessage =
-      status === 'verified'
-        ? 'Your repair shop has been verified'
-        : 'Your repair shop has been rejected';
-
-    await createNotification({
-      recipientId: shop.ownerId._id,
-      type: notificationType,
-      title: notificationTitle,
-      message: notificationMessage,
-      resourceType: 'repair-shop',
-      resourceId: shop._id,
-      metadata: { status },
-    });
 
     return res.status(200).json({
       success: true,
@@ -475,5 +485,6 @@ module.exports = {
   getRepairShopById,
   listRepairShops,
   verifyRepairShop,
+  performShopStatusUpdate,
   listShopReviews,
 };
