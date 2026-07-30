@@ -9,8 +9,6 @@ const {
   getUserIdValidator,
   listRepairShopsValidator,
   getRepairShopIdValidator,
-  verifyRepairShopValidator,
-  rejectRepairShopValidator,
   listServiceRequestsValidator,
   getServiceRequestIdValidator,
   listReviewsValidator,
@@ -35,7 +33,6 @@ router.get(
   '/dashboard',
   verifyToken,
   authorizeRoles('admin'),
-  handleValidationErrors,
   getDashboard
 );
 
@@ -80,7 +77,6 @@ router.patch(
   verifyToken,
   authorizeRoles('admin'),
   getRepairShopIdValidator,
-  verifyRepairShopValidator,
   handleValidationErrors,
   verifyRepairShop
 );
@@ -90,7 +86,6 @@ router.patch(
   verifyToken,
   authorizeRoles('admin'),
   getRepairShopIdValidator,
-  rejectRepairShopValidator,
   handleValidationErrors,
   rejectRepairShop
 );

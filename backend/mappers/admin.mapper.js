@@ -1,7 +1,3 @@
-const { buildAdminRepairShopResponse } = require('../mappers/repairShop.mapper');
-const { buildServiceRequestResponse } = require('../mappers/serviceRequest.mapper');
-const { buildReviewResponse } = require('../mappers/review.mapper');
-
 const buildAdminUserListItem = (user) => {
   return {
     id: user._id.toString(),

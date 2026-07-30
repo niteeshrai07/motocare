@@ -1,4 +1,4 @@
-const { query, param, body } = require('express-validator');
+const { query, param } = require('express-validator');
 
 const MAX_ADMIN_LIMIT = 100;
 
@@ -72,20 +72,6 @@ const getRepairShopIdValidator = [
   param('id')
     .isMongoId()
     .withMessage('Invalid repair shop ID format'),
-];
-
-const verifyRepairShopValidator = [
-  body('status')
-    .isIn(['verified', 'rejected'])
-    .withMessage('status must be either verified or rejected'),
-];
-
-const rejectRepairShopValidator = [
-  body('reason')
-    .optional()
-    .trim()
-    .isLength({ max: 500 })
-    .withMessage('reason must be under 500 characters'),
 ];
 
 const listServiceRequestsValidator = [
@@ -169,8 +155,6 @@ module.exports = {
   getUserIdValidator,
   listRepairShopsValidator,
   getRepairShopIdValidator,
-  verifyRepairShopValidator,
-  rejectRepairShopValidator,
   listServiceRequestsValidator,
   getServiceRequestIdValidator,
   listReviewsValidator,
