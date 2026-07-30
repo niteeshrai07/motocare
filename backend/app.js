@@ -5,6 +5,7 @@ const authRoutes = require('./routes/auth.routes');
 const repairShopRoutes = require('./routes/repairShop.routes');
 const serviceRequestRoutes = require('./routes/serviceRequest.routes');
 const notificationRoutes = require('./routes/notification.routes');
+const adminRoutes = require('./routes/admin.routes');
 
 
 const app = express();
@@ -28,5 +29,6 @@ app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/repair-shops', repairShopRoutes);
 app.use('/api/v1/service-requests', serviceRequestRoutes);
 app.use('/api/v1/notifications', notificationRoutes);
+app.use('/api/v1/admin', adminRoutes);
 
 module.exports = app;
