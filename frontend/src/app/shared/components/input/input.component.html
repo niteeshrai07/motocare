@@ -1,0 +1,30 @@
+<div class="input-wrapper">
+  @if (label) {
+    <label class="input-label" [attr.for]="id">
+      {{ label }}
+      @if (required) {
+        <span class="input-required" aria-hidden="true">*</span>
+      }
+    </label>
+  }
+  <input
+    [id]="id"
+    [type]="type"
+    [placeholder]="placeholder"
+    [disabled]="disabled"
+    [value]="value"
+    [class.input--error]="error"
+    [class.input--disabled]="disabled"
+    [class.input-field--sm]="size === 'sm'"
+    [class.input-field--md]="size === 'md'"
+    [class.input-field--lg]="size === 'lg'"
+    class="input-field"
+    (input)="onInput($event)"
+    (blur)="onBlur()"
+  />
+  @if (error) {
+    <span class="input-error" role="alert">{{ error }}</span>
+  } @else if (helperText) {
+    <span class="input-helper">{{ helperText }}</span>
+  }
+</div>
