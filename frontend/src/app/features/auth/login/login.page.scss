@@ -1,0 +1,42 @@
+.auth-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: var(--color-bg);
+  padding: var(--space-4);
+}
+
+.auth-form {
+  &__field {
+    margin-bottom: var(--space-4);
+  }
+
+  &__error {
+    margin: var(--space-2) 0;
+    font-size: 14px;
+    color: var(--color-danger);
+  }
+
+  &__actions {
+    margin-top: var(--space-5);
+    text-align: center;
+  }
+
+  &__footer {
+    margin-top: var(--space-4);
+    text-align: center;
+    font-size: 14px;
+    color: var(--color-text-secondary);
+  }
+
+  &__link {
+    color: var(--color-primary);
+    text-decoration: underline;
+    cursor: pointer;
+
+    &:hover {
+      color: var(--color-primary-light);
+    }
+  }
+}

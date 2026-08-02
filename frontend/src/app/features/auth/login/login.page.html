@@ -1,0 +1,50 @@
+<div class="auth-page">
+  <app-card title="Welcome back" subtitle="Sign in to your account">
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" autocomplete="off" novalidate>
+      <div class="auth-form__field">
+        <app-input
+          formControlName="email"
+          id="login-email"
+          label="Email"
+          type="email"
+          placeholder="you@example.com"
+          [required]="true"
+          autocomplete="email"
+          [error]="emailError"
+        />
+      </div>
+
+      <div class="auth-form__field">
+        <app-input
+          formControlName="password"
+          id="login-password"
+          label="Password"
+          type="password"
+          placeholder="••••••••"
+          [required]="true"
+          autocomplete="current-password"
+          [error]="passwordError"
+        />
+      </div>
+
+      @if (serverError()) {
+        <div class="auth-form__error" role="alert">{{ serverError() }}</div>
+      }
+
+      <div class="auth-form__actions">
+        <app-button
+          type="submit"
+          [disabled]="form.invalid || isSubmitting()"
+          [loading]="isSubmitting()"
+        >
+          Sign in
+        </app-button>
+      </div>
+    </form>
+
+    <div class="auth-form__footer">
+      <span>Don't have an account? </span>
+      <a routerLink="/register" class="auth-form__link">Create an account</a>
+    </div>
+  </app-card>
+</div>

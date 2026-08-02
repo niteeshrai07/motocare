@@ -35,8 +35,8 @@ export class AuthService {
     );
   }
 
-  getCurrentUser(): Observable<ApiResponse<User>> {
-    return this.http.get<ApiResponse<User>>(`${this.apiUrl}/auth/me`);
+  getCurrentUser(): Observable<ApiResponse<{ user: User }>> {
+    return this.http.get<ApiResponse<{ user: User }>>(`${this.apiUrl}/auth/me`);
   }
 
   logout(): void {
@@ -57,16 +57,17 @@ export class AuthService {
     this.getCurrentUser().subscribe({
       next: (response) => {
         if (response.success && response.data) {
-          this.currentUser.set(response.data);
+          this.currentUser.set(response.data.user);
         }
       },
       error: () => {
-        this.logout();
+        this.currentUser.set(null);
       },
     });
   }
 
-  setUser(user: User | null): void {
+  persistSession(token: string, user: User | null): void {
+    localStorage.setItem('token', token);
     this.currentUser.set(user);
   }
 }

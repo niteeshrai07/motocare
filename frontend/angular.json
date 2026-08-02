@@ -36,7 +36,12 @@
                   "with": "src/environments/environment.production.ts"
                 }
               ],
-              "budgets": [
+               "optimization": {
+                 "fonts": {
+                   "inline": false
+                 }
+               },
+               "budgets": [
                 {
                   "type": "initial",
                   "maximumWarning": "500kB",
