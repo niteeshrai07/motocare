@@ -1,0 +1,235 @@
+<div class="profile-page">
+  @if (serverError() && !isEditing() && !isChangingPassword()) {
+    <div class="profile-error" role="alert">
+      {{ serverError() }}
+    </div>
+  }
+
+  @if (passwordSuccess()) {
+    <div class="profile-success" role="alert">
+      {{ passwordSuccess() }}
+    </div>
+  }
+
+  @if (isLoading()) {
+    <app-card title="Profile" subtitle="Loading your profile...">
+      <div class="skeleton">
+        <div class="skeleton__row"></div>
+        <div class="skeleton__row skeleton__row--short"></div>
+        <div class="skeleton__row"></div>
+        <div class="skeleton__row skeleton__row--short"></div>
+      </div>
+    </app-card>
+  } @else if (!serverError() && profile() && !isEditing() && !isChangingPassword()) {
+    <app-card title="Profile" subtitle="Manage your profile information">
+      <div class="profile-grid">
+        <div class="profile-field">
+          <span class="profile-field__label">Name</span>
+          <span class="profile-field__value">{{ profile()?.name }}</span>
+        </div>
+        <div class="profile-field">
+          <span class="profile-field__label">Email</span>
+          <span class="profile-field__value">{{ profile()?.email }}</span>
+        </div>
+        <div class="profile-field">
+          <span class="profile-field__label">Phone</span>
+          <span class="profile-field__value">{{ profile()?.phone }}</span>
+        </div>
+        <div class="profile-field">
+          <span class="profile-field__label">Role</span>
+          <span class="profile-field__value">{{ profile()?.role }}</span>
+        </div>
+        <div class="profile-field">
+          <span class="profile-field__label">Member Since</span>
+          <span class="profile-field__value">{{ profile()?.createdAt }}</span>
+        </div>
+        <div class="profile-field">
+          <span class="profile-field__label">Last Updated</span>
+          <span class="profile-field__value">{{ profile()?.updatedAt }}</span>
+        </div>
+        @if (profile()?.role === 'mechanic' && profile()?.repairShop) {
+          <div class="profile-field">
+            <span class="profile-field__label">Shop</span>
+            <span class="profile-field__value">{{ profile()?.repairShop?.shopName }}</span>
+          </div>
+          <div class="profile-field">
+            <span class="profile-field__label">Shop Status</span>
+            <span class="profile-field__value">{{ profile()?.repairShop?.status }}</span>
+          </div>
+        }
+      </div>
+      <div card-footer>
+        <app-button variant="outline" (click)="enterEditMode()">Edit Profile</app-button>
+        <app-button variant="outline" (click)="enterChangePasswordMode()">Change Password</app-button>
+      </div>
+    </app-card>
+
+    <div class="danger-zone">
+      <h3 class="danger-zone__title">Danger Zone</h3>
+      <p class="danger-zone__description">
+        Deactivating your account will permanently disable your access.
+        You will need to contact support to reactivate your account.
+      </p>
+      <div class="danger-zone__field">
+        <label for="deactivation-confirmation" class="danger-zone__label">
+          Type DEACTIVATE to confirm
+          <span class="danger-zone__required" aria-hidden="true">*</span>
+        </label>
+        <input
+          id="deactivation-confirmation"
+          type="text"
+          placeholder="DEACTIVATE"
+          class="danger-zone__input"
+          [formControl]="deactivationControl"
+        />
+      </div>
+
+      @if (serverError()) {
+        <div class="profile-form__error" role="alert">{{ serverError() }}</div>
+      }
+
+      <div class="danger-zone__actions">
+        <app-button
+          type="button"
+          variant="secondary"
+          [disabled]="!hasDeactivationInput || isDeactivating()"
+          (click)="cancelDeactivation()"
+        >
+          Cancel
+        </app-button>
+        <app-button
+          type="button"
+          variant="danger"
+          [disabled]="!canDeactivate || isDeactivating()"
+          [loading]="isDeactivating()"
+          (click)="onDeactivate()"
+        >
+          Deactivate Account
+        </app-button>
+      </div>
+    </div>
+  } @else if (!serverError() && profile() && isEditing()) {
+    <app-card title="Edit Profile" subtitle="Update your profile information">
+      <form [formGroup]="form" (ngSubmit)="onSave()" autocomplete="off" novalidate>
+        <div class="profile-form__field">
+          <app-input
+            formControlName="name"
+            id="profile-edit-name"
+            label="Name"
+            type="text"
+            placeholder="Enter your name"
+            [required]="true"
+            autocomplete="name"
+            [error]="nameError"
+          />
+        </div>
+
+        <div class="profile-form__field">
+          <app-input
+            formControlName="phone"
+            id="profile-edit-phone"
+            label="Phone"
+            type="tel"
+            placeholder="+919876543210"
+            [required]="true"
+            autocomplete="tel"
+            [error]="phoneError"
+          />
+        </div>
+
+        @if (serverError()) {
+          <div class="profile-form__error" role="alert">{{ serverError() }}</div>
+        }
+
+        <div class="profile-form__actions">
+          <app-button
+            type="button"
+            variant="secondary"
+            [disabled]="isSubmitting()"
+            (click)="cancelEdit()"
+          >
+            Cancel
+          </app-button>
+          <app-button
+            type="submit"
+            [disabled]="form.invalid || isSubmitting()"
+            [loading]="isSubmitting()"
+          >
+            Save
+          </app-button>
+        </div>
+      </form>
+    </app-card>
+  } @else if (profile() && isChangingPassword()) {
+    <app-card title="Change Password" subtitle="Enter your current and new password">
+      <form [formGroup]="passwordForm" (ngSubmit)="onChangePassword()" autocomplete="new-password" novalidate>
+        <div class="profile-form__field">
+          <app-input
+            formControlName="currentPassword"
+            id="profile-current-password"
+            label="Current Password"
+            type="password"
+            placeholder="Enter your current password"
+            [required]="true"
+            autocomplete="current-password"
+            [error]="currentPasswordError"
+          />
+        </div>
+
+        <div class="profile-form__field">
+          <app-input
+            formControlName="newPassword"
+            id="profile-new-password"
+            label="New Password"
+            type="password"
+            placeholder="At least 6 characters"
+            [required]="true"
+            autocomplete="new-password"
+            [error]="newPasswordError"
+          />
+        </div>
+
+        <div class="profile-form__field">
+          <app-input
+            formControlName="confirmPassword"
+            id="profile-confirm-password"
+            label="Confirm New Password"
+            type="password"
+            placeholder="Confirm your new password"
+            [required]="true"
+            autocomplete="new-password"
+            [error]="confirmPasswordError"
+          />
+        </div>
+
+        @if (serverError()) {
+          <div class="profile-form__error" role="alert">{{ serverError() }}</div>
+        }
+
+        <div class="profile-form__actions">
+          <app-button
+            type="button"
+            variant="secondary"
+            [disabled]="isSubmitting()"
+            (click)="exitChangePasswordMode()"
+          >
+            Cancel
+          </app-button>
+          <app-button
+            type="submit"
+            [disabled]="passwordForm.invalid || isSubmitting()"
+            [loading]="isSubmitting()"
+          >
+            Change Password
+          </app-button>
+        </div>
+      </form>
+    </app-card>
+  } @else if (!profile() && !serverError()) {
+    <app-card title="Profile" subtitle="Manage your profile information">
+      <div class="profile-placeholder">
+        <p>No profile data available.</p>
+      </div>
+    </app-card>
+  }
+</div>

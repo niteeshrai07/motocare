@@ -27,7 +27,11 @@ export class ErrorInterceptor implements HttpInterceptor {
         } else if (error.error?.message) {
           errorMessage = error.error.message;
         } else if (error.status === 403) {
-          errorMessage = 'You do not have permission to perform this action.';
+          if (req.url.includes('/auth/login')) {
+            errorMessage = error.error?.message || 'You do not have permission to perform this action.';
+          } else {
+            errorMessage = 'You do not have permission to perform this action.';
+          }
         } else if (error.status === 404) {
           errorMessage = 'The requested resource was not found.';
         } else if (error.status === 500) {

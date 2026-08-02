@@ -15,10 +15,17 @@ export const routes: Routes = [
     path: '',
     component: AppShellComponent,
     canActivate: [authGuard],
-    children: [],
+    children: [
+      { path: '', redirectTo: 'profile', pathMatch: 'full' },
+      {
+        path: 'profile',
+        loadComponent: () => import('./features/profile/profile.page').then((m) => m.ProfilePageComponent),
+      },
+    ],
   },
   {
     path: '**',
     redirectTo: '',
+    pathMatch: 'full',
   },
 ];

@@ -16,6 +16,17 @@ export function matchPasswords(passwordName: string, confirmName: string): Valid
   };
 }
 
+export function passwordsDiffer(currentName: string, newName: string): ValidatorFn {
+  return (group: AbstractControl): ValidationErrors | null => {
+    const current = group.get(currentName);
+    const newControl = group.get(newName);
+    if (!current || !newControl || !newControl.value) {
+      return null;
+    }
+    return newControl.value !== current.value ? null : { sameAsCurrent: true };
+  };
+}
+
 export function mustBeOneOf(allowed: readonly string[]): ValidatorFn {
   return (control: AbstractControl): ValidationErrors | null => {
     if (control.value === null || control.value === undefined || control.value === '') {
