@@ -1,0 +1,245 @@
+.sr-detail-page {
+  padding: var(--space-6) 0;
+}
+
+.sr-error {
+  padding: var(--space-4);
+  margin-bottom: var(--space-4);
+  background: #fef2f2;
+  border: 1px solid var(--color-danger);
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  color: var(--color-danger);
+}
+
+.skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.skeleton__row {
+  height: 20px;
+  background: var(--color-border);
+  border-radius: var(--radius-sm);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.skeleton__row--short {
+  width: 60%;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.4;
+  }
+}
+
+.sr-detail-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.sr-detail-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.sr-detail-section--header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.sr-detail-header-left {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.sr-detail-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.sr-detail-value {
+  font-size: 14px;
+  color: var(--color-text);
+  margin: 0;
+}
+
+.sr-detail-vehicle {
+  flex-direction: row;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.sr-detail-vehicle-icon {
+  font-size: 20px;
+}
+
+.sr-detail-description {
+  word-break: break-word;
+  white-space: pre-wrap;
+}
+
+.sr-detail-notes {
+  white-space: pre-wrap;
+  word-break: break-word;
+  background: var(--color-hover);
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+}
+
+.sr-detail-id {
+  font-size: 12px;
+  font-family: var(--font-mono, monospace);
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.sr-detail-coordinates {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.sr-detail-coordinates__label {
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.sr-detail-coordinates__value {
+  font-family: var(--font-mono, monospace);
+  color: var(--color-text);
+}
+
+.sr-detail-coordinates__combined {
+  margin-top: var(--space-1);
+  font-family: var(--font-mono, monospace);
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.sr-detail-section--meta {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-3);
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.sr-detail-meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-3);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.sr-detail-meta-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+
+.sr-detail-meta-value {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+.sr-expired-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-3);
+  background: var(--color-danger-subtle, #fef2f2);
+  border: 1px solid var(--color-danger);
+  border-radius: var(--radius-md);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-danger);
+}
+
+.sr-back-button {
+  margin-top: var(--space-6);
+  display: flex;
+  justify-content: flex-start;
+}
+
+.sr-success {
+  padding: var(--space-4);
+  margin-bottom: var(--space-4);
+  background: var(--color-success-subtle, #f0fdf4);
+  border: 1px solid var(--color-success);
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  color: var(--color-success, #16a34a);
+}
+
+.sr-detail-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.sr-detail-action-buttons {
+  display: flex;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.sr-cancel-confirm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.sr-cancel-confirm__text {
+  font-size: 14px;
+  color: var(--color-text);
+  margin: 0;
+}
+
+.sr-cancel-confirm__buttons {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.sr-quote-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.sr-quote-form__title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.sr-quote-form__field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}

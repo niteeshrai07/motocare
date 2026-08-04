@@ -1,0 +1,239 @@
+<div class="sr-detail-page">
+  @if (serverError()) {
+    <div class="sr-error" role="alert">
+      {{ serverError() }}
+    </div>
+  }
+
+  @if (successMessage()) {
+    <div class="sr-success" role="alert">
+      {{ successMessage() }}
+    </div>
+  }
+
+  @if (isLoading()) {
+    <app-card title="Service Request" subtitle="Loading service request details...">
+      <div class="skeleton">
+        <div class="skeleton__row"></div>
+        <div class="skeleton__row skeleton__row--short"></div>
+        <div class="skeleton__row"></div>
+        <div class="skeleton__row skeleton__row--short"></div>
+        <div class="skeleton__row"></div>
+        <div class="skeleton__row"></div>
+        <div class="skeleton__row skeleton__row--short"></div>
+      </div>
+    </app-card>
+  } @else if (request()) {
+    <app-card title="Service Request" subtitle="View service request details">
+      <div class="sr-detail-body">
+        <div class="sr-detail-section sr-detail-section--header">
+          <div class="sr-detail-header-left">
+            <app-request-status-badge [status]="request()!.status" />
+            @if (isExpired()) {
+              <span class="sr-expired-indicator" title="This request has expired">
+                ⚠ Expired
+              </span>
+            }
+          </div>
+          <span class="sr-detail-id">#SR-{{ request()!.id.substring(0, 8) }}</span>
+        </div>
+
+        <div class="sr-detail-section">
+          <h3 class="sr-detail-label">Vehicle</h3>
+          <div class="sr-detail-value sr-detail-vehicle">
+            <span class="sr-detail-vehicle-icon">{{ vehicleIcon() }}</span>
+            <span>{{ vehicleLabel() }}</span>
+          </div>
+        </div>
+
+        <div class="sr-detail-section">
+          <h3 class="sr-detail-label">Issue Description</h3>
+          <p class="sr-detail-value sr-detail-description">{{ request()!.issueDescription }}</p>
+        </div>
+
+        @if (hasLocation()) {
+          <div class="sr-detail-section">
+            <h3 class="sr-detail-label">Location</h3>
+            <div class="sr-detail-coordinates">
+              <span class="sr-detail-coordinates__label">Latitude:</span>
+              <span class="sr-detail-coordinates__value">{{ request()!.location.coordinates[1] }}</span>
+              <span class="sr-detail-coordinates__label">Longitude:</span>
+              <span class="sr-detail-coordinates__value">{{ request()!.location.coordinates[0] }}</span>
+            </div>
+            <span class="sr-detail-coordinates__combined">{{ formatCoordinates() }}</span>
+          </div>
+        }
+
+        <div class="sr-detail-section">
+          <h3 class="sr-detail-label">Customer</h3>
+          <p class="sr-detail-value">Name: {{ request()!.customer.name }}</p>
+          @if (request()!.customer.phone) {
+            <p class="sr-detail-value">Phone: {{ request()!.customer.phone }}</p>
+          }
+        </div>
+
+        <div class="sr-detail-section">
+          <h3 class="sr-detail-label">Repair Shop</h3>
+          <p class="sr-detail-value">Name: {{ request()!.shop.shopName }}</p>
+          @if (request()!.shop.phone) {
+            <p class="sr-detail-value">Phone: {{ request()!.shop.phone }}</p>
+          }
+        </div>
+
+        @if (request()!.estimatedCost !== null && request()!.estimatedCost !== undefined) {
+          <div class="sr-detail-section">
+            <h3 class="sr-detail-label">Estimated Cost</h3>
+            <p class="sr-detail-value">{{ request()!.estimatedCost | currency }}</p>
+          </div>
+        }
+
+        @if (request()!.estimatedDuration) {
+          <div class="sr-detail-section">
+            <h3 class="sr-detail-label">Estimated Duration</h3>
+            <p class="sr-detail-value">{{ request()!.estimatedDuration }}</p>
+          </div>
+        }
+
+        @if (request()!.mechanicNotes) {
+          <div class="sr-detail-section">
+            <h3 class="sr-detail-label">Mechanic Notes</h3>
+            <p class="sr-detail-value sr-detail-notes">{{ request()!.mechanicNotes }}</p>
+          </div>
+        }
+
+        <div class="sr-detail-section sr-detail-section--meta">
+          <div class="sr-detail-meta-item">
+            <span class="sr-detail-meta-label">Created</span>
+            <span class="sr-detail-meta-value">{{ request()!.createdAt | date: 'medium' }}</span>
+          </div>
+          <div class="sr-detail-meta-item">
+            <span class="sr-detail-meta-label">Updated</span>
+            <span class="sr-detail-meta-value">{{ request()!.updatedAt | date: 'medium' }}</span>
+          </div>
+          <div class="sr-detail-meta-item">
+            <span class="sr-detail-meta-label">Expires</span>
+            <span class="sr-detail-meta-value">{{ request()!.expiresAt | date: 'medium' }}</span>
+          </div>
+        </div>
+
+        @if (showActions()) {
+          <div class="sr-detail-actions">
+            @if (isConfirmingCancel()) {
+              <div class="sr-cancel-confirm">
+                <p class="sr-cancel-confirm__text">Are you sure you want to cancel?</p>
+                <div class="sr-cancel-confirm__buttons">
+                  <app-button type="button" variant="primary" (click)="confirmCancel()" [disabled]="isActionLoading()">
+                    {{ isActionLoading() ? 'Cancelling...' : 'Yes, Cancel' }}
+                  </app-button>
+                  <app-button type="button" variant="outline" (click)="cancelCancel()" [disabled]="isActionLoading()">
+                    No
+                  </app-button>
+                </div>
+              </div>
+            } @else {
+              <div class="sr-detail-action-buttons">
+                @if (canAccept()) {
+                  <app-button type="button" variant="primary" (click)="accept()" [disabled]="isActionLoading()">
+                    {{ isActionLoading() ? 'Accepting...' : 'Accept Quote' }}
+                  </app-button>
+                }
+                @if (canCancel()) {
+                  <app-button type="button" variant="outline" (click)="startCancel()" [disabled]="isActionLoading()">
+                    Cancel Request
+                  </app-button>
+                }
+              </div>
+            }
+          </div>
+        }
+
+        @if (showMechanicActions()) {
+          <div class="sr-detail-actions">
+            @if (isConfirmingReject()) {
+              <div class="sr-cancel-confirm">
+                <p class="sr-cancel-confirm__text">Are you sure you want to reject this request?</p>
+                <div class="sr-cancel-confirm__buttons">
+                  <app-button type="button" variant="primary" (click)="confirmReject()" [disabled]="isActionLoading()">
+                    {{ isActionLoading() ? 'Rejecting...' : 'Yes, Reject' }}
+                  </app-button>
+                  <app-button type="button" variant="outline" (click)="cancelReject()" [disabled]="isActionLoading()">
+                    No
+                  </app-button>
+                </div>
+              </div>
+            } @else if (isQuoteFormExpanded()) {
+              <div class="sr-quote-form">
+                <h3 class="sr-quote-form__title">Quote Request</h3>
+                <form [formGroup]="quoteForm" autocomplete="off" novalidate>
+                  <div class="sr-quote-form__field">
+                    <app-input
+                      formControlName="estimatedCost"
+                      label="Estimated Cost"
+                      type="number"
+                      placeholder="0.00"
+                      [required]="true"
+                      [error]="quoteCostCtrl.touched && quoteCostCtrl.invalid ? 'Estimated cost is required' : ''"
+                    />
+                  </div>
+                  <div class="sr-quote-form__field">
+                    <app-input
+                      formControlName="estimatedDuration"
+                      label="Estimated Duration"
+                      placeholder="e.g. 2 hours"
+                      [required]="true"
+                      [error]="quoteDurationCtrl.touched && quoteDurationCtrl.invalid ? 'Estimated duration is required' : ''"
+                    />
+                  </div>
+                  <div class="sr-quote-form__field">
+                    <app-input
+                      formControlName="mechanicNotes"
+                      label="Mechanic Notes"
+                      placeholder="Optional notes"
+                    />
+                  </div>
+                  <div class="sr-detail-action-buttons">
+                    <app-button type="button" variant="primary" (click)="submitQuote()" [disabled]="quoteForm.invalid || isActionLoading()">
+                      {{ isActionLoading() ? 'Submitting...' : 'Submit Quote' }}
+                    </app-button>
+                    <app-button type="button" variant="outline" (click)="toggleQuoteForm()" [disabled]="isActionLoading()">
+                      Cancel
+                    </app-button>
+                  </div>
+                </form>
+              </div>
+            } @else {
+              <div class="sr-detail-action-buttons">
+                @if (canQuote()) {
+                  <app-button type="button" variant="primary" (click)="toggleQuoteForm()" [disabled]="isActionLoading()">
+                    Quote
+                  </app-button>
+                }
+                @if (canReject()) {
+                  <app-button type="button" variant="outline" (click)="startReject()" [disabled]="isActionLoading()">
+                    Reject
+                  </app-button>
+                }
+                @if (canStart()) {
+                  <app-button type="button" variant="primary" (click)="startWork()" [disabled]="isActionLoading()">
+                    {{ isActionLoading() ? 'Starting...' : 'Start Work' }}
+                  </app-button>
+                }
+                @if (canComplete()) {
+                  <app-button type="button" variant="primary" (click)="completeWork()" [disabled]="isActionLoading()">
+                    {{ isActionLoading() ? 'Completing...' : 'Complete Work' }}
+                  </app-button>
+                }
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </app-card>
+  }
+
+  <div class="sr-back-button">
+    <app-button type="button" variant="outline" (click)="goBack()">
+      Back to Service Requests
+    </app-button>
+  </div>
+</div>

@@ -14,7 +14,9 @@ export class AuthService {
 
   readonly user = this.currentUser.asReadonly();
 
-  constructor(private http: HttpClient, private router: Router) {
+  constructor(private http: HttpClient, private router: Router) {}
+
+  restoreSession(): void {
     const token = this.getToken();
     if (token) {
       this.loadCurrentUser();

@@ -1,0 +1,77 @@
+<div class="sr-list-page">
+  @if (serverError()) {
+    <div class="sr-error" role="alert">
+      {{ serverError() }}
+    </div>
+  }
+
+  <app-card title="Service Requests" subtitle="View and manage your service requests">
+    <div class="sr-toolbar">
+      <div class="sr-filters">
+        @for (filter of statusFilters; track filter) {
+          <button
+            type="button"
+            class="sr-filter-btn"
+            [class.sr-filter-btn--active]="activeFilter() === filter"
+            (click)="setFilter(filter)"
+          >
+            {{ filter === 'all' ? 'All' : formatStatus(filter) }}
+          </button>
+        }
+      </div>
+
+      @if (isCustomer()) {
+        <app-button
+          type="button"
+          variant="primary"
+          routerLink="/service-requests/new"
+        >
+          New Service Request
+        </app-button>
+      }
+    </div>
+
+    @if (isLoading()) {
+      <div class="sr-loading">
+        <p>Loading service requests...</p>
+      </div>
+    } @else if (!isLoading() && requests().length === 0) {
+      <div class="sr-empty">
+        <p>You don't have any service requests yet.</p>
+      </div>
+    } @else {
+      <div class="sr-grid">
+        @for (request of requests(); track request.id) {
+          <app-service-request-card
+            [request]="request"
+            (selected)="onRequestClick($event)"
+          />
+        }
+      </div>
+
+      @if (totalPages() > 1) {
+        <div class="sr-pagination">
+          <app-button
+            type="button"
+            variant="outline"
+            [disabled]="page() <= 1 || isLoading()"
+            (click)="prevPage()"
+          >
+            Previous
+          </app-button>
+          <span class="sr-page-info">
+            Page {{ page() }} of {{ totalPages() }}
+          </span>
+          <app-button
+            type="button"
+            variant="outline"
+            [disabled]="page() >= totalPages() || isLoading()"
+            (click)="nextPage()"
+          >
+            Next
+          </app-button>
+        </div>
+      }
+    }
+  </app-card>
+</div>

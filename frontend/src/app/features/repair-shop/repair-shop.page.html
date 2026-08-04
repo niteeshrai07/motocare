@@ -1,0 +1,331 @@
+<div class="rs-page">
+  @if (serverError()) {
+    <div class="rs-error" role="alert">
+      {{ serverError() }}
+    </div>
+  }
+
+  @if (successMessage()) {
+    <div class="rs-success" role="alert">
+      {{ successMessage() }}
+    </div>
+  }
+
+  @if (isLoading()) {
+    <app-card title="Repair Shop" subtitle="Loading shop details...">
+      <div class="skeleton">
+        <div class="skeleton__row"></div>
+        <div class="skeleton__row skeleton__row--short"></div>
+        <div class="skeleton__row"></div>
+        <div class="skeleton__row skeleton__row--short"></div>
+      </div>
+    </app-card>
+  } @else if (!hasShop()) {
+    <app-card title="Create Repair Shop" subtitle="Set up your shop profile">
+      <form [formGroup]="form" (ngSubmit)="saveShop()" class="rs-form" autocomplete="off" novalidate>
+        <div class="rs-form__field">
+          <app-input
+            formControlName="shopName"
+            label="Shop Name"
+            placeholder="e.g. MotoCare Repairs"
+            [required]="true"
+            [error]="shopNameCtrl ? (shopNameCtrl.touched && shopNameCtrl.invalid ? 'Shop name must be 2-100 characters' : '') : ''"
+          />
+        </div>
+
+        <div class="rs-form__field">
+          <label class="rs-form__label">Vehicle Types Serviced</label>
+          <div class="rs-vehicle-types">
+            @for (type of vehicleTypes; track type.value) {
+              <button
+                type="button"
+                class="rs-vehicle-badge"
+                [class.rs-vehicle-badge--selected]="hasVehicleType(type.value)"
+                (click)="toggleVehicleType(type.value)"
+                [disabled]="isSaving()"
+              >
+                {{ type.label }}
+              </button>
+            }
+          </div>
+          @if (vehicleTypesCtrl && vehicleTypesCtrl.touched && vehicleTypesCtrl.invalid) {
+            <span class="rs-form__error">Select at least one vehicle type</span>
+          }
+        </div>
+
+        <div class="rs-form__field">
+          <label class="rs-form__label">Location</label>
+          @if (isLocationSet()) {
+            <p class="rs-location__text">{{ formatLocation() }}</p>
+          } @else {
+            <p class="rs-location__placeholder">No location set</p>
+          }
+          <div class="rs-location__actions">
+            <app-button type="button" variant="outline" size="sm" (click)="getLocation()" [disabled]="isSaving() || isLocating()">
+              {{ isLocating() ? 'Detecting...' : 'Use My Location' }}
+            </app-button>
+          </div>
+          @if (locationError()) {
+            <span class="rs-form__error" role="alert">{{ locationError() }}</span>
+          }
+        </div>
+
+        <div class="rs-form__field">
+          <app-input
+            formControlName="address"
+            label="Address"
+            placeholder="e.g. 123 Service Street, Delhi"
+            [required]="true"
+            [error]="addressCtrl ? (addressCtrl.touched && addressCtrl.invalid ? 'Address is required (max 300 chars)' : '') : ''"
+          />
+        </div>
+
+        <div class="rs-form__field">
+          <app-input
+            formControlName="phone"
+            label="Phone"
+            placeholder="e.g. +91 9876543210"
+            [required]="true"
+            [error]="phoneCtrl ? (phoneCtrl.touched && phoneCtrl.invalid ? 'A valid Indian phone number is required' : '') : ''"
+          />
+        </div>
+
+        <div class="rs-form__field">
+          <app-input
+            formControlName="description"
+            label="Description"
+            placeholder="Tell customers about your shop (optional)"
+          />
+        </div>
+
+        <div class="rs-form__field">
+          <app-input
+            formControlName="openingHours"
+            label="Opening Hours"
+            placeholder="e.g. Mon-Fri: 9am-6pm"
+          />
+        </div>
+
+        <div class="rs-form__field">
+          <app-input
+            formControlName="photoUrl"
+            label="Photo URL"
+            placeholder="https://example.com/photo.jpg"
+          />
+        </div>
+
+        <div class="rs-form__actions">
+          <app-button type="submit" variant="primary" [disabled]="form.invalid || isSaving()">
+            {{ isSaving() ? 'Creating...' : 'Create Repair Shop' }}
+          </app-button>
+        </div>
+      </form>
+    </app-card>
+  } @else {
+    @if (isEditMode()) {
+      <app-card title="Edit Repair Shop" subtitle="Update your shop information">
+        @if (reverificationRequired()) {
+          <div class="rs-warning" role="alert">
+            <strong>Heads up:</strong> Changing the shop name, address, vehicle types, or location will reset your verification status to pending for re-review.
+          </div>
+        }
+
+        <form [formGroup]="form" (ngSubmit)="saveShop()" class="rs-form" autocomplete="off" novalidate>
+          <div class="rs-form__field">
+            <app-input
+              formControlName="shopName"
+              label="Shop Name"
+              [required]="true"
+              [error]="shopNameCtrl ? (shopNameCtrl.touched && shopNameCtrl.invalid ? 'Shop name must be 2-100 characters' : '') : ''"
+            />
+          </div>
+
+          <div class="rs-form__field">
+            <label class="rs-form__label">Vehicle Types Serviced</label>
+            <div class="rs-vehicle-types">
+              @for (type of vehicleTypes; track type.value) {
+                <button
+                  type="button"
+                  class="rs-vehicle-badge"
+                  [class.rs-vehicle-badge--selected]="hasVehicleType(type.value)"
+                  (click)="toggleVehicleType(type.value)"
+                  [disabled]="isSaving()"
+                >
+                  {{ type.label }}
+                </button>
+              }
+            </div>
+          </div>
+
+          <div class="rs-form__field">
+            <label class="rs-form__label">Location</label>
+            @if (isLocationSet()) {
+              <p class="rs-location__text">{{ formatLocation() }}</p>
+            } @else {
+              <p class="rs-location__placeholder">No location set</p>
+            }
+            <div class="rs-location__actions">
+              <app-button type="button" variant="outline" size="sm" (click)="getLocation()" [disabled]="isSaving() || isLocating()">
+                {{ isLocating() ? 'Detecting...' : 'Use My Location' }}
+              </app-button>
+            </div>
+            @if (locationError()) {
+              <span class="rs-form__error" role="alert">{{ locationError() }}</span>
+            }
+          </div>
+
+          <div class="rs-form__field">
+            <app-input
+              formControlName="address"
+              label="Address"
+              [required]="true"
+              [error]="addressCtrl ? (addressCtrl.touched && addressCtrl.invalid ? 'Address is required (max 300 chars)' : '') : ''"
+            />
+          </div>
+
+          <div class="rs-form__field">
+            <app-input
+              formControlName="phone"
+              label="Phone"
+              [required]="true"
+              [error]="phoneCtrl ? (phoneCtrl.touched && phoneCtrl.invalid ? 'A valid Indian phone number is required' : '') : ''"
+            />
+          </div>
+
+          <div class="rs-form__field">
+            <app-input
+              formControlName="description"
+              label="Description"
+              placeholder="Tell customers about your shop (optional)"
+            />
+          </div>
+
+          <div class="rs-form__field">
+            <app-input
+              formControlName="openingHours"
+              label="Opening Hours"
+              placeholder="e.g. Mon-Fri: 9am-6pm"
+            />
+          </div>
+
+          <div class="rs-form__field">
+            <app-input
+              formControlName="photoUrl"
+              label="Photo URL"
+              placeholder="https://example.com/photo.jpg"
+            />
+          </div>
+
+          <div class="rs-form__actions">
+            <app-button type="submit" variant="primary" [disabled]="form.invalid || isSaving()">
+              {{ isSaving() ? 'Saving...' : 'Save Changes' }}
+            </app-button>
+            <app-button type="button" variant="outline" (click)="cancelEdit()" [disabled]="isSaving()">
+              Cancel
+            </app-button>
+          </div>
+        </form>
+      </app-card>
+    } @else {
+      <app-card title="My Repair Shop" subtitle="Shop profile and status">
+        <div class="rs-view-body">
+          <div class="rs-view-section rs-view-section--header">
+            <div class="rs-view-header-left">
+              <span class="rs-status-badge">
+                <app-verification-badge [status]="verificationStatus()" />
+              </span>
+              <span class="rs-status-label">{{ verificationLabel() }}</span>
+            </div>
+            <span class="rs-view-id">#SH-{{ shop()!.id.substring(0, 8) }}</span>
+          </div>
+
+          @if (shop()!.rating !== undefined && shop()!.rating !== null) {
+            <div class="rs-view-section">
+              <h3 class="rs-view-label">Rating</h3>
+              <p class="rs-view-value">★ {{ shop()!.rating }} / 5</p>
+            </div>
+          }
+
+          <div class="rs-view-section">
+            <h3 class="rs-view-label">Shop Name</h3>
+            <p class="rs-view-value">{{ shop()!.shopName }}</p>
+          </div>
+
+          <div class="rs-view-section">
+            <h3 class="rs-view-label">Vehicle Types</h3>
+            <div class="rs-view-vehicle-types">
+              @for (vtype of shop()!.vehicleTypesServiced; track $index) {
+                <span class="rs-view-vehicle-badge">
+                  {{ vtype === 'two_wheeler' ? 'Two Wheeler' : 'Four Wheeler' }}
+                </span>
+              }
+            </div>
+          </div>
+
+          <div class="rs-view-section">
+            <h3 class="rs-view-label">Address</h3>
+            <p class="rs-view-value">{{ shop()!.address }}</p>
+          </div>
+
+          <div class="rs-view-section">
+            <h3 class="rs-view-label">Phone</h3>
+            <p class="rs-view-value">{{ shop()!.phone }}</p>
+          </div>
+
+          @if (shop()!.description) {
+            <div class="rs-view-section">
+              <h3 class="rs-view-label">Description</h3>
+              <p class="rs-view-value">{{ shop()!.description }}</p>
+            </div>
+          }
+
+          @if (shop()!.openingHours) {
+            <div class="rs-view-section">
+              <h3 class="rs-view-label">Opening Hours</h3>
+              <p class="rs-view-value">{{ shop()!.openingHours }}</p>
+            </div>
+          }
+
+          @if (shop()!.photoUrl) {
+            <div class="rs-view-section">
+              <h3 class="rs-view-label">Photo</h3>
+              <div class="rs-view-photo">
+                <img [src]="shop()!.photoUrl" [alt]="shop()!.shopName" class="rs-view-photo__img" />
+              </div>
+            </div>
+          }
+
+          <div class="rs-view-section rs-view-section--meta">
+            <div class="rs-view-meta-item">
+              <span class="rs-view-meta-label">Created</span>
+              <span class="rs-view-meta-value">{{ shop()!.createdAt | date: 'medium' }}</span>
+            </div>
+            <div class="rs-view-meta-item">
+              <span class="rs-view-meta-label">Updated</span>
+              <span class="rs-view-meta-value">{{ shop()!.updatedAt | date: 'medium' }}</span>
+            </div>
+          </div>
+
+          @if (reverificationRequired()) {
+            <div class="rs-warning">
+              <strong>Note:</strong> Your shop's verification status was reset to "Pending" because key information changed.
+            </div>
+          }
+        </div>
+        <div class="rs-view-actions">
+          <app-button type="button" variant="outline" (click)="startEdit()" [disabled]="isSaving()">
+            Edit Shop
+          </app-button>
+        </div>
+      </app-card>
+    }
+  }
+
+  @if (hasShop() && !isEditMode()) {
+    <div class="rs-back-button">
+      <app-button type="button" variant="outline" (click)="goBack()">
+        Back to Service Requests
+      </app-button>
+    </div>
+  }
+</div>

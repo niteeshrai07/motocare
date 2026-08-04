@@ -134,6 +134,23 @@
   color: var(--color-primary);
 }
 
+.sidebar__item--disabled {
+  pointer-events: none;
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.sidebar__coming-soon {
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 400;
+  color: var(--color-text-secondary);
+  background: var(--color-border);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  margin-left: auto;
+}
+
 .sidebar__item lucide-icon {
   flex-shrink: 0;
 }

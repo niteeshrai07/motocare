@@ -1,0 +1,186 @@
+<div class="sr-create-page">
+  @if (serverError()) {
+    <div class="sr-error" role="alert">
+      {{ serverError() }}
+    </div>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" autocomplete="off" novalidate>
+    <app-card title="Create Service Request" subtitle="Find a repair shop and describe your issue">
+      <div class="sr-create-field">
+        <label class="sr-create-label">Vehicle Type</label>
+        <div class="sr-vehicle-selector">
+          @for (vt of vehicleTypes; track vt.value) {
+            <label class="sr-vehicle-option">
+              <input
+                type="radio"
+                name="vehicleType"
+                [value]="vt.value"
+                formControlName="vehicleType"
+                class="sr-vehicle-input"
+              />
+              <span class="sr-vehicle-label">
+                <span class="sr-vehicle-icon">{{ vt.icon }}</span>
+                {{ vt.label }}
+              </span>
+            </label>
+          }
+        </div>
+        @if (form.get('vehicleType')?.hasError('required') && form.get('vehicleType')?.touched) {
+          <span class="sr-form-error" role="alert">Vehicle type is required</span>
+        }
+      </div>
+
+      <div class="sr-create-field">
+        <label class="sr-create-label">Issue Description</label>
+        <textarea
+          formControlName="issueDescription"
+          class="sr-textarea"
+          placeholder="Describe your issue (minimum 5 characters)"
+          rows="4"
+          [class.sr-textarea--error]="form.get('issueDescription')?.invalid && form.get('issueDescription')?.touched"
+        ></textarea>
+        @if (form.get('issueDescription')?.hasError('required') && form.get('issueDescription')?.touched) {
+          <span class="sr-form-error" role="alert">Issue description is required</span>
+        }
+        @if (form.get('issueDescription')?.hasError('minlength') && form.get('issueDescription')?.touched) {
+          <span class="sr-form-error" role="alert">Issue description must be at least 5 characters</span>
+        }
+        @if (form.get('issueDescription')?.hasError('maxlength') && form.get('issueDescription')?.touched) {
+          <span class="sr-form-error" role="alert">Issue description must be under 500 characters</span>
+        }
+      </div>
+
+      <div class="sr-create-field">
+        <label class="sr-create-label">Breakdown Location</label>
+        <div class="sr-location">
+          <div class="sr-location__source">
+            <label class="sr-location__option">
+              <input
+                type="radio"
+                name="locationType"
+                value="geolocation"
+                formControlName="locationType"
+              />
+              <span>Use my current location</span>
+            </label>
+            <label class="sr-location__option">
+              <input
+                type="radio"
+                name="locationType"
+                value="manual"
+                formControlName="locationType"
+              />
+              <span>Enter manually</span>
+            </label>
+          </div>
+
+          @if (locationType === 'geolocation' && !coordinates()) {
+            <button
+              type="button"
+              class="sr-btn sr-btn--outline"
+              [disabled]="isLocating()"
+              (click)="useGeolocation()"
+            >
+              @if (isLocating()) {
+                <span>Locating...</span>
+              } @else {
+                <span>Get My Location</span>
+              }
+            </button>
+          }
+
+          @if (locationError()) {
+            <div class="sr-location__error" role="alert">
+              {{ locationError() }}
+            </div>
+          }
+
+          @if (coordinates()) {
+            <div class="sr-location__coords">
+              Latitude: {{ coordinates()!.lat }}, Longitude: {{ coordinates()!.lng }}
+            </div>
+          }
+
+          @if (locationType === 'manual') {
+            <div class="sr-location__inputs">
+              <div class="sr-location__input">
+                <label class="sr-location__sublabel">Latitude</label>
+                <input
+                  type="number"
+                  step="0.000001"
+                  placeholder="e.g. 28.6139"
+                  formControlName="locationLat"
+                  class="sr-input"
+                  [class.sr-input--error]="form.get('locationLat')?.invalid && form.get('locationLat')?.touched"
+                />
+                @if (form.get('locationLat')?.hasError('required') && form.get('locationLat')?.touched) {
+                  <span class="sr-form-error" role="alert">Latitude is required</span>
+                }
+              </div>
+              <div class="sr-location__input">
+                <label class="sr-location__sublabel">Longitude</label>
+                <input
+                  type="number"
+                  step="0.000001"
+                  placeholder="e.g. 77.5946"
+                  formControlName="locationLng"
+                  class="sr-input"
+                  [class.sr-input--error]="form.get('locationLng')?.invalid && form.get('locationLng')?.touched"
+                />
+                @if (form.get('locationLng')?.hasError('required') && form.get('locationLng')?.touched) {
+                  <span class="sr-form-error" role="alert">Longitude is required</span>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+
+      <div class="sr-create-field">
+        <label class="sr-create-label">Repair Shop</label>
+        @if (form.get('vehicleType')?.value && coordinates() && locationType === 'geolocation') {
+          <app-shop-selector
+            [lng]="coordinates()!.lng"
+            [lat]="coordinates()!.lat"
+            [vehicleType]="form.get('vehicleType')?.value"
+            [selectedShopId]="form.get('shopId')?.value"
+            (shopSelected)="onShopSelected($event)"
+          />
+        } @else if (form.get('vehicleType')?.value && manualLat !== null && manualLng !== null && locationType === 'manual') {
+          <app-shop-selector
+            [lng]="manualLng"
+            [lat]="manualLat"
+            [vehicleType]="form.get('vehicleType')?.value"
+            [selectedShopId]="form.get('shopId')?.value"
+            (shopSelected)="onShopSelected($event)"
+          />
+        } @else {
+          <p class="sr-create__hint">
+            Select a vehicle type and provide your location to search for repair shops.
+          </p>
+        }
+        @if (form.get('shopId')?.hasError('required') && form.get('shopId')?.touched) {
+          <span class="sr-form-error" role="alert">Please select a repair shop</span>
+        }
+      </div>
+
+      <div card-footer>
+        <app-button
+          type="button"
+          variant="outline"
+          (click)="goBack()"
+        >
+          Cancel
+        </app-button>
+        <app-button
+          type="submit"
+          [disabled]="form.invalid || isSubmitting"
+          [loading]="isSubmitting"
+        >
+          Create Request
+        </app-button>
+      </div>
+    </app-card>
+  </form>
+</div>
