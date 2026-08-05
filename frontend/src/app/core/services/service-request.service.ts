@@ -12,6 +12,12 @@ import {
   RejectServiceRequestPayload,
   NearbyShopsResponse,
 } from '../models/service-request.model';
+import {
+  Review,
+  ReviewResponse,
+  CreateReviewPayload,
+  UpdateReviewPayload,
+} from '../models/review.model';
 import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
@@ -127,6 +133,32 @@ export class ServiceRequestService {
     return this.http.patch<ApiResponse<ServiceRequestDetailResponse>>(
       `${this.apiUrl}/service-requests/${id}/complete`,
       {},
+    );
+  }
+
+  createReview(requestId: string, payload: CreateReviewPayload): Observable<ApiResponse<ReviewResponse>> {
+    return this.http.post<ApiResponse<ReviewResponse>>(
+      `${this.apiUrl}/service-requests/${requestId}/review`,
+      payload,
+    );
+  }
+
+  getReview(requestId: string): Observable<ApiResponse<ReviewResponse>> {
+    return this.http.get<ApiResponse<ReviewResponse>>(
+      `${this.apiUrl}/service-requests/${requestId}/review`,
+    );
+  }
+
+  updateReview(requestId: string, payload: UpdateReviewPayload): Observable<ApiResponse<ReviewResponse>> {
+    return this.http.patch<ApiResponse<ReviewResponse>>(
+      `${this.apiUrl}/service-requests/${requestId}/review`,
+      payload,
+    );
+  }
+
+  deleteReview(requestId: string): Observable<ApiResponse<null>> {
+    return this.http.delete<ApiResponse<null>>(
+      `${this.apiUrl}/service-requests/${requestId}/review`,
     );
   }
 }

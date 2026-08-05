@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { of, throwError, Observable } from 'rxjs';
+import { of, throwError, NEVER } from 'rxjs';
 import { vi } from 'vitest';
 import { signal } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -282,7 +282,7 @@ describe('RepairShopPageComponent', () => {
       repairShopService.getMyShop.mockReturnValue(
         throwError(() => new HttpErrorResponse({ status: 404 }))
       );
-      repairShopService.create.mockReturnValue(new Observable(() => {}) as any);
+      repairShopService.create.mockReturnValue(NEVER as any);
       fixture.detectChanges();
 
       const c = component as any;
@@ -406,7 +406,7 @@ describe('RepairShopPageComponent', () => {
 
     it('should not update when already saving', () => {
       repairShopService.getMyShop.mockReturnValue(of(mockResponse));
-      repairShopService.update.mockReturnValue(new Observable(() => {}) as any);
+      repairShopService.update.mockReturnValue(NEVER as any);
       fixture.detectChanges();
 
       const c = component as any;

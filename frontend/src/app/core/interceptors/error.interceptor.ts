@@ -13,6 +13,13 @@ export class ErrorInterceptor implements HttpInterceptor {
     return next.handle(req).pipe(
       catchError((error: HttpErrorResponse) => {
         const authService = this.injector.get(AuthService);
+
+        // Preserve HttpErrorResponse for review GET 404s so callers can
+        // distinguish "no review exists" from real errors.
+        if (error.status === 404 && req.url.includes('/review')) {
+          return throwError(() => error);
+        }
+
         let errorMessage = 'An unexpected error occurred';
 
         if (error.status === 401) {

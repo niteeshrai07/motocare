@@ -9,6 +9,7 @@ import { ServiceRequestService } from '../../../core/services/service-request.se
 import { AuthService } from '../../../core/services/auth.service';
 import { ApiResponse } from '../../../core/models/api-response.model';
 import { ServiceRequest } from '../../../core/models/service-request.model';
+import { Review, ReviewResponse } from '../../../core/models/review.model';
 
 
 describe('ServiceRequestDetailPageComponent', () => {
@@ -23,6 +24,10 @@ describe('ServiceRequestDetailPageComponent', () => {
     reject: vi.fn(),
     startWork: vi.fn(),
     completeWork: vi.fn(),
+    createReview: vi.fn(),
+    getReview: vi.fn(),
+    updateReview: vi.fn(),
+    deleteReview: vi.fn(),
   };
 
   const router = {
@@ -62,6 +67,34 @@ describe('ServiceRequestDetailPageComponent', () => {
     success: true,
     message: 'Service request fetched successfully',
     data: { serviceRequest: mockRequest },
+    errors: null,
+  };
+
+  const mockCompletedRequest: ServiceRequest = {
+    ...mockRequest,
+    status: 'completed',
+  };
+
+  const mockCompletedResponse: ApiResponse<{ serviceRequest: ServiceRequest }> = {
+    ...mockResponse,
+    data: { serviceRequest: mockCompletedRequest },
+  };
+
+  const mockReview: Review = {
+    id: 'review-1',
+    serviceRequestId: 'req-123456789',
+    customer: { id: 'cust-1', name: 'Jane Doe' },
+    shop: { id: 'shop-1', shopName: 'MotoCare Repairs' },
+    rating: 5,
+    comment: 'Great service!',
+    createdAt: '2025-01-02T10:00:00.000Z',
+    updatedAt: '2025-01-02T10:00:00.000Z',
+  };
+
+  const mockReviewResponse: ApiResponse<ReviewResponse> = {
+    success: true,
+    message: 'Review fetched successfully',
+    data: { review: mockReview },
     errors: null,
   };
 
@@ -108,7 +141,13 @@ describe('ServiceRequestDetailPageComponent', () => {
 
     fixture = TestBed.createComponent(ServiceRequestDetailPageComponent);
     component = fixture.componentInstance;
+    serviceRequestService.getReview.mockReturnValue(
+      throwError(() => new HttpErrorResponse({ status: 404 }))
+    );
     vi.clearAllMocks();
+    serviceRequestService.getReview.mockReturnValue(
+      throwError(() => new HttpErrorResponse({ status: 404 }))
+    );
   });
 
   describe('Initialization', () => {
@@ -2169,6 +2208,405 @@ describe('ServiceRequestDetailPageComponent', () => {
 
       expect(serviceRequestService.getById.mock.calls.length).toBe(1);
       expect(serviceRequestService.quote.mock.calls.length).toBe(1);
+    });
+  });
+
+  describe('Reviews', () => {
+    it('should show review section only when status is completed', () => {
+      serviceRequestService.getById.mockReturnValue(of(mockCompletedResponse));
+      serviceRequestService.getReview.mockReturnValue(
+        throwError(() => new HttpErrorResponse({ status: 404 }))
+      );
+      fixture.detectChanges();
+
+      const c = component as any;
+      expect(c.canViewReview()).toBe(true);
+    });
+
+    it('should NOT show review section when status is not completed', () => {
+      serviceRequestService.getById.mockReturnValue(of(mockResponse));
+      fixture.detectChanges();
+
+      const c = component as any;
+      expect(c.canViewReview()).toBe(false);
+    });
+
+    it('should load review on completed request', () => {
+      serviceRequestService.getById.mockReturnValue(of(mockCompletedResponse));
+      serviceRequestService.getReview.mockReturnValue(of(mockReviewResponse));
+      fixture.detectChanges();
+
+      const c = component as any;
+      expect(c.review()).toBeTruthy();
+      expect(c.review().rating).toBe(5);
+    });
+
+    it('should set review to null on 404 (no review exists)', () => {
+      serviceRequestService.getById.mockReturnValue(of(mockCompletedResponse));
+      serviceRequestService.getReview.mockReturnValue(
+        throwError(() => new HttpErrorResponse({ status: 404 }))
+      );
+      fixture.detectChanges();
+
+      const c = component as any;
+      expect(c.review()).toBeNull();
+      expect(c.reviewError()).toBeNull();
+    });
+
+    it('should set reviewError on 403', () => {
+      serviceRequestService.getById.mockReturnValue(of(mockCompletedResponse));
+      serviceRequestService.getReview.mockReturnValue(
+        throwError(() => new HttpErrorResponse({ status: 403 }))
+      );
+      fixture.detectChanges();
+
+      const c = component as any;
+      expect(c.reviewError()).toContain('authorized');
+    });
+
+    it('should set reviewError on 500', () => {
+      serviceRequestService.getById.mockReturnValue(of(mockCompletedResponse));
+      serviceRequestService.getReview.mockReturnValue(
+        throwError(() => new HttpErrorResponse({ status: 500, statusText: 'Server Error' }))
+      );
+      fixture.detectChanges();
+
+      const c = component as any;
+      expect(c.reviewError()).toBeTruthy();
+    });
+
+    it('should show create form for customer when no review exists', () => {
+      setCustomer();
+      serviceRequestService.getById.mockReturnValue(of(mockCompletedResponse));
+      serviceRequestService.getReview.mockReturnValue(
+        throwError(() => new HttpErrorResponse({ status: 404 }))
+      );
+      fixture.detectChanges();
+
+      const c = component as any;
+      expect(c.canCreateReview()).toBe(true);
+    });
+
+    it('should NOT show create form for mechanic', () => {
+      setMechanic();
+      serviceRequestService.getById.mockReturnValue(of(mockCompletedResponse));
+      serviceRequestService.getReview.mockReturnValue(
+        throwError(() => new HttpErrorResponse({ status: 404 }))
+      );
+      fixture.detectChanges();
+
+      const c = component as any;
+      expect(c.canCreateReview()).toBe(false);
+    });
+
+    it('should show display mode when review exists', () => {
+      setCustomer();
+      serviceRequestService.getById.mockReturnValue(of(mockCompletedResponse));
+      serviceRequestService.getReview.mockReturnValue(of(mockReviewResponse));
+      fixture.detectChanges();
+
+      const c = component as any;
+      expect(c.canEditReview()).toBe(true);
+      expect(c.canDeleteReview()).toBe(true);
+    });
+
+    it('should allow edit for customer', () => {
+      setCustomer();
+      serviceRequestService.getById.mockReturnValue(of(mockCompletedResponse));
+      serviceRequestService.getReview.mockReturnValue(of(mockReviewResponse));
+      fixture.detectChanges();
+
+      const c = component as any;
+      expect(c.canEditReview()).toBe(true);
+    });
+
+    it('should allow delete for customer', () => {
+      setCustomer();
+      serviceRequestService.getById.mockReturnValue(of(mockCompletedResponse));
+      serviceRequestService.getReview.mockReturnValue(of(mockReviewResponse));
+      fixture.detectChanges();
+
+      const c = component as any;
+      expect(c.canDeleteReview()).toBe(true);
+    });
+
+    it('should not allow edit for mechanic', () => {
+      setMechanic();
+      serviceRequestService.getById.mockReturnValue(of(mockCompletedResponse));
+      serviceRequestService.getReview.mockReturnValue(of(mockReviewResponse));
+      fixture.detectChanges();
+
+      const c = component as any;
+      expect(c.canEditReview()).toBe(false);
+      expect(c.canDeleteReview()).toBe(false);
+    });
+
+    it('should submit review creation', () => {
+      setCustomer();
+      serviceRequestService.getById.mockReturnValue(of(mockCompletedResponse));
+      serviceRequestService.getReview.mockReturnValue(
+        throwError(() => new HttpErrorResponse({ status: 404 }))
+      );
+      serviceRequestService.createReview.mockReturnValue(of({
+        ...mockReviewResponse,
+        message: 'Review created successfully',
+      }));
+      fixture.detectChanges();
+
+      const c = component as any;
+      c.reviewForm.controls.rating.setValue(4);
+      c.reviewForm.controls.comment.setValue('Good service');
+      c.submitReview();
+
+      expect(serviceRequestService.createReview).toHaveBeenCalledWith('req-123456789', {
+        rating: 4,
+        comment: 'Good service',
+      });
+      expect(c.review()).toBeTruthy();
+      expect(c.successMessage()).toBe('Review created successfully');
+    });
+
+    it('should not submit review when form is invalid', () => {
+      setCustomer();
+      serviceRequestService.getById.mockReturnValue(of(mockCompletedResponse));
+      serviceRequestService.getReview.mockReturnValue(
+        throwError(() => new HttpErrorResponse({ status: 404 }))
+      );
+      fixture.detectChanges();
+
+      const c = component as any;
+      c.reviewForm.controls.rating.setValue(0);
+      c.submitReview();
+
+      expect(serviceRequestService.createReview).not.toHaveBeenCalled();
+    });
+
+    it('should handle 409 on create (already reviewed)', () => {
+      setCustomer();
+      serviceRequestService.getById.mockReturnValue(of(mockCompletedResponse));
+      serviceRequestService.getReview.mockReturnValue(
+        throwError(() => new HttpErrorResponse({ status: 404 }))
+      );
+      serviceRequestService.createReview.mockReturnValue(
+        throwError(() => new HttpErrorResponse({ status: 409 }))
+      );
+      fixture.detectChanges();
+
+      const c = component as any;
+      c.reviewForm.controls.rating.setValue(5);
+      c.submitReview();
+
+      expect(c.reviewError()).toContain('already reviewed');
+    });
+
+    it('should update review on edit', () => {
+      setCustomer();
+      serviceRequestService.getById.mockReturnValue(of(mockCompletedResponse));
+      serviceRequestService.getReview.mockReturnValue(of(mockReviewResponse));
+      const updatedReview = { ...mockReview, rating: 4, comment: 'Updated comment' };
+      serviceRequestService.updateReview.mockReturnValue(of({
+        ...mockReviewResponse,
+        data: { review: updatedReview },
+        message: 'Review updated successfully',
+      }));
+      fixture.detectChanges();
+
+      const c = component as any;
+      c.startEditReview();
+      c.reviewForm.controls.rating.setValue(4);
+      c.reviewForm.controls.comment.setValue('Updated comment');
+      c.submitReviewEdit();
+
+      expect(serviceRequestService.updateReview).toHaveBeenCalledWith('req-123456789', {
+        rating: 4,
+        comment: 'Updated comment',
+      });
+      expect(c.review().rating).toBe(4);
+      expect(c.isEditingReview()).toBe(false);
+      expect(c.successMessage()).toBe('Review updated successfully');
+    });
+
+    it('should cancel edit review', () => {
+      setCustomer();
+      serviceRequestService.getById.mockReturnValue(of(mockCompletedResponse));
+      serviceRequestService.getReview.mockReturnValue(of(mockReviewResponse));
+      fixture.detectChanges();
+
+      const c = component as any;
+      c.startEditReview();
+      expect(c.isEditingReview()).toBe(true);
+      c.cancelEditReview();
+      expect(c.isEditingReview()).toBe(false);
+      expect(c.reviewForm.value.rating).toBe(5);
+      expect(c.reviewForm.value.comment).toBe('Great service!');
+    });
+
+    it('should start delete review confirmation', () => {
+      setCustomer();
+      serviceRequestService.getById.mockReturnValue(of(mockCompletedResponse));
+      serviceRequestService.getReview.mockReturnValue(of(mockReviewResponse));
+      fixture.detectChanges();
+
+      const c = component as any;
+      c.startDeleteReview();
+      expect(c.isConfirmingDeleteReview()).toBe(true);
+    });
+
+    it('should cancel delete review confirmation', () => {
+      setCustomer();
+      serviceRequestService.getById.mockReturnValue(of(mockCompletedResponse));
+      serviceRequestService.getReview.mockReturnValue(of(mockReviewResponse));
+      fixture.detectChanges();
+
+      const c = component as any;
+      c.startDeleteReview();
+      c.cancelDeleteReview();
+      expect(c.isConfirmingDeleteReview()).toBe(false);
+    });
+
+    it('should delete review and set review to null', () => {
+      setCustomer();
+      serviceRequestService.getById.mockReturnValue(of(mockCompletedResponse));
+      serviceRequestService.getReview.mockReturnValue(of(mockReviewResponse));
+      serviceRequestService.deleteReview.mockReturnValue(of({
+        success: true,
+        message: 'Review deleted successfully',
+        data: null,
+        errors: null,
+      }));
+      fixture.detectChanges();
+
+      const c = component as any;
+      c.startDeleteReview();
+      c.confirmDeleteReview();
+
+      expect(serviceRequestService.deleteReview).toHaveBeenCalledWith('req-123456789');
+      expect(c.review()).toBeNull();
+      expect(c.isConfirmingDeleteReview()).toBe(false);
+      expect(c.successMessage()).toBe('Review deleted successfully');
+    });
+
+    it('should not delete when action in progress', () => {
+      setCustomer();
+      serviceRequestService.getById.mockReturnValue(of(mockCompletedResponse));
+      serviceRequestService.getReview.mockReturnValue(of(mockReviewResponse));
+      fixture.detectChanges();
+
+      const c = component as any;
+      c.actionInProgress.set('quote' as any);
+      c.startDeleteReview();
+      expect(c.isConfirmingDeleteReview()).toBe(false);
+      expect(serviceRequestService.deleteReview.mock.calls.length).toBe(0);
+    });
+
+    it('should handle 403 on update', () => {
+      setCustomer();
+      serviceRequestService.getById.mockReturnValue(of(mockCompletedResponse));
+      serviceRequestService.getReview.mockReturnValue(of(mockReviewResponse));
+      serviceRequestService.updateReview.mockReturnValue(
+        throwError(() => new HttpErrorResponse({ status: 403 }))
+      );
+      fixture.detectChanges();
+
+      const c = component as any;
+      c.startEditReview();
+      c.reviewForm.controls.rating.setValue(3);
+      c.submitReviewEdit();
+
+      expect(c.reviewError()).toContain('authorized');
+    });
+
+    it('should handle 403 on delete', () => {
+      setCustomer();
+      serviceRequestService.getById.mockReturnValue(of(mockCompletedResponse));
+      serviceRequestService.getReview.mockReturnValue(of(mockReviewResponse));
+      serviceRequestService.deleteReview.mockReturnValue(
+        throwError(() => new HttpErrorResponse({ status: 403 }))
+      );
+      fixture.detectChanges();
+
+      const c = component as any;
+      c.startDeleteReview();
+      c.confirmDeleteReview();
+
+      expect(c.reviewError()).toContain('authorized');
+    });
+
+    it('should rate star correctly', () => {
+      serviceRequestService.getById.mockReturnValue(of(mockCompletedResponse));
+      serviceRequestService.getReview.mockReturnValue(
+        throwError(() => new HttpErrorResponse({ status: 404 }))
+      );
+      fixture.detectChanges();
+
+      const c = component as any;
+      c.rateStar(3);
+      expect(c.reviewForm.value.rating).toBe(4);
+    });
+
+    it('should render correct star characters for 5-star rating', () => {
+      setCustomer();
+      serviceRequestService.getById.mockReturnValue(of(mockCompletedResponse));
+      serviceRequestService.getReview.mockReturnValue(of(mockReviewResponse));
+      fixture.detectChanges();
+
+      const c = component as any;
+      expect(c.getRatingStars()).toBe('★★★★★');
+    });
+
+    it('should render correct star characters for 3-star rating', () => {
+      setCustomer();
+      serviceRequestService.getById.mockReturnValue(of(mockCompletedResponse));
+      const threeStarReview = { ...mockReview, rating: 3 };
+      serviceRequestService.getReview.mockReturnValue(of({
+        ...mockReviewResponse,
+        data: { review: threeStarReview },
+      }));
+      fixture.detectChanges();
+
+      const c = component as any;
+      expect(c.getRatingStars()).toBe('★★★☆☆');
+    });
+
+    it('should format relative time', () => {
+      serviceRequestService.getById.mockReturnValue(of(mockCompletedResponse));
+      serviceRequestService.getReview.mockReturnValue(
+        throwError(() => new HttpErrorResponse({ status: 404 }))
+      );
+      fixture.detectChanges();
+
+      const c = component as any;
+      const result = c.formatRelativeTime('2025-01-01T10:00:00.000Z');
+      expect(typeof result).toBe('string');
+      expect(result.length).toBeGreaterThan(0);
+    });
+
+    it('should show review section for customer viewing another mechanic shop completed request', () => {
+      setCustomer();
+      serviceRequestService.getById.mockReturnValue(of(mockCompletedResponse));
+      serviceRequestService.getReview.mockReturnValue(
+        throwError(() => new HttpErrorResponse({ status: 404 }))
+      );
+      fixture.detectChanges();
+
+      const c = component as any;
+      expect(c.isCustomer()).toBe(true);
+      expect(c.canViewReview()).toBe(true);
+      expect(c.canCreateReview()).toBe(true);
+    });
+
+    it('should show review display for mechanic viewing completed request with review', () => {
+      setMechanic();
+      serviceRequestService.getById.mockReturnValue(of(mockCompletedResponse));
+      serviceRequestService.getReview.mockReturnValue(of(mockReviewResponse));
+      fixture.detectChanges();
+
+      const c = component as any;
+      expect(c.isMechanic()).toBe(true);
+      expect(c.canViewReview()).toBe(true);
+      expect(c.canEditReview()).toBe(false);
+      expect(c.canDeleteReview()).toBe(false);
+      expect(c.review()).toBeTruthy();
     });
   });
 });

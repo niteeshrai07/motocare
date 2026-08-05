@@ -228,8 +228,134 @@
           </div>
         }
       </div>
-    </app-card>
-  }
+      </app-card>
+    }
+
+    @if (canViewReview()) {
+      <app-card title="Review" subtitle="Customer review for this service">
+        @if (isReviewLoading()) {
+          <div style="padding: 16px; text-align: center; color: var(--color-text-secondary);">
+            <p>Loading review...</p>
+          </div>
+        } @else if (reviewError()) {
+          <div class="sr-error" role="alert">
+            {{ reviewError() }}
+          </div>
+        } @else if (review()) {
+          @if (isEditingReview()) {
+            <form [formGroup]="reviewForm" (ngSubmit)="submitReviewEdit()" class="sr-quote-form" autocomplete="off" novalidate>
+              <div class="sr-quote-form__field" style="gap: 8px;">
+                <label class="sr-detail-label">Rating</label>
+                <div style="display: flex; gap: 4px; cursor: pointer; user-select: none;" (click)="reviewRatingCtrl.markAsTouched()">
+                  @for (star of [1, 2, 3, 4, 5]; track $index) {
+                    <span
+                      type="button"
+                      class="sr-rating-star"
+                      [class.sr-rating-star--filled]="reviewForm.value.rating >= star"
+                      (click)="rateStar(star - 1)"
+                      [attr.data-rating]="star"
+                    >
+                      {{ reviewForm.value.rating >= star ? '★' : '☆' }}
+                    </span>
+                  }
+                </div>
+                @if (reviewRatingCtrl.touched && reviewRatingCtrl.invalid) {
+                  <span style="font-size: 12px; color: var(--color-danger);">Please select a rating between 1 and 5</span>
+                }
+              </div>
+
+              <div class="sr-quote-form__field">
+                <app-input
+                  formControlName="comment"
+                  label="Comment"
+                  placeholder="Share your experience (optional)"
+                />
+              </div>
+
+              <div class="sr-detail-action-buttons">
+                <app-button type="submit" variant="primary" [disabled]="reviewForm.invalid || isActionLoading()">
+                  {{ isActionLoading() ? 'Saving...' : 'Save Review' }}
+                </app-button>
+                <app-button type="button" variant="outline" (click)="cancelEditReview()" [disabled]="isActionLoading()">
+                  Cancel
+                </app-button>
+              </div>
+            </form>
+          } @else {
+            <div class="sr-detail-body sr-review-display">
+              <div class="sr-review-header" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+                <div class="sr-review-rating">{{ getRatingStars() }}</div>
+                <div class="sr-review-meta" style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px;">
+                  <span class="sr-review-customer">{{ review()!.customer?.name ?? 'Customer' }}</span>
+                  <span class="sr-review-time">{{ review()!.createdAt | date: 'medium' }}</span>
+                </div>
+              </div>
+              @if (review()!.comment) {
+                <p class="sr-review-comment">{{ review()!.comment }}</p>
+              }
+              @if (canEditReview()) {
+                <div class="sr-detail-action-buttons">
+                  <app-button type="button" variant="outline" size="sm" (click)="startEditReview()" [disabled]="isActionLoading()">
+                    Edit
+                  </app-button>
+                  <app-button type="button" variant="outline" size="sm" (click)="startDeleteReview()" [disabled]="isActionLoading()">
+                    Delete
+                  </app-button>
+                </div>
+              }
+            </div>
+          }
+           @if (isConfirmingDeleteReview()) {
+            <div class="sr-cancel-confirm">
+              <p class="sr-cancel-confirm__text">Are you sure you want to delete this review?</p>
+              <div class="sr-cancel-confirm__buttons">
+                <app-button type="button" variant="primary" (click)="confirmDeleteReview()" [disabled]="isActionLoading()">
+                  {{ isActionLoading() ? 'Deleting...' : 'Yes, Delete' }}
+                </app-button>
+                <app-button type="button" variant="outline" (click)="cancelDeleteReview()" [disabled]="isActionLoading()">
+                  Cancel
+                </app-button>
+              </div>
+            </div>
+          }
+        } @else if (canCreateReview()) {
+          <form [formGroup]="reviewForm" (ngSubmit)="submitReview()" class="sr-review-form" autocomplete="off" novalidate>
+            <div class="sr-review-form__rating">
+              <label class="sr-detail-label">Rating</label>
+              <div style="display: flex; gap: 4px; cursor: pointer; user-select: none;" (click)="reviewRatingCtrl.markAsTouched()">
+                @for (star of [1, 2, 3, 4, 5]; track $index) {
+                  <span
+                    type="button"
+                    (click)="rateStar(star - 1)"
+                    [attr.data-rating]="star"
+                    [style.color]="reviewForm.value.rating >= star ? 'var(--color-warning)' : 'var(--color-text-secondary)'"
+                  >
+                    {{ reviewForm.value.rating >= star ? '★' : '☆' }}
+                  </span>
+                }
+              </div>
+              @if (reviewRatingCtrl.touched && reviewRatingCtrl.invalid) {
+                <span style="font-size: 12px; color: var(--color-danger);">Please select a rating between 1 and 5</span>
+              }
+            </div>
+
+            <div class="sr-quote-form__field">
+              <app-input
+                formControlName="comment"
+                label="Comment"
+                placeholder="Share your experience (optional)"
+              />
+            </div>
+
+            <div class="sr-detail-action-buttons">
+              <app-button type="submit" variant="primary" [disabled]="reviewForm.invalid || isActionLoading()">
+                {{ isActionLoading() ? 'Submitting...' : 'Submit Review' }}
+              </app-button>
+            </div>
+          </form>
+        }
+      </app-card>
+    }
 
   <div class="sr-back-button">
     <app-button type="button" variant="outline" (click)="goBack()">

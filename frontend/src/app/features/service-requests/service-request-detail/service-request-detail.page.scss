@@ -243,3 +243,25 @@
   flex-direction: column;
   gap: var(--space-2);
 }
+
+/* Review section */
+.sr-review-rating {
+  font-size: 20px;
+  color: var(--color-warning);
+  font-family: var(--font-mono, monospace);
+}
+
+.sr-review-customer,
+.sr-review-time {
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.sr-review-time { font-size: 11px; }
+
+.sr-review-comment {
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 0;
+  white-space: pre-wrap;
+}
