@@ -39,6 +39,10 @@ export const routes: Routes = [
         canActivate: [mechanicGuard],
         loadComponent: () => import('./features/repair-shop/repair-shop.page').then((m) => m.RepairShopPageComponent),
       },
+      {
+        path: 'notifications',
+        loadComponent: () => import('./features/notifications/notifications.page').then((m) => m.NotificationsPageComponent),
+      },
     ],
   },
   {

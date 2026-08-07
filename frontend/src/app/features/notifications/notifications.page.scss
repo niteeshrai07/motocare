@@ -1,0 +1,221 @@
+.nt-page {
+  padding: var(--space-6) 0;
+}
+
+.nt-error {
+  padding: var(--space-4);
+  margin-bottom: var(--space-4);
+  background: #fef2f2;
+  border: 1px solid var(--color-danger);
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  color: var(--color-danger);
+}
+
+.nt-success {
+  padding: var(--space-4);
+  margin-bottom: var(--space-4);
+  background: var(--color-success-subtle, #f0fdf4);
+  border: 1px solid var(--color-success, #16a34a);
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  color: var(--color-success, #16a34a);
+}
+
+.nt-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-4);
+}
+
+.nt-header__left {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.nt-header__title {
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.nt-header__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 8px;
+  background: var(--color-primary);
+  color: white;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: var(--radius-full);
+}
+
+.nt-tabs {
+  display: flex;
+  gap: var(--space-1);
+  margin-bottom: var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.nt-tab {
+  padding: var(--space-2) var(--space-4);
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.nt-tab:hover {
+  color: var(--color-text);
+}
+
+.nt-tab--active {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+}
+
+.nt-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.nt-row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.nt-row:hover {
+  background: var(--color-hover);
+}
+
+.nt-row--unread {
+  border-left: 3px solid var(--color-primary);
+  background: var(--color-primary-subtle);
+}
+
+.nt-row--unread:hover {
+  background: var(--color-hover);
+}
+
+.nt-row--skeleton {
+  pointer-events: none;
+}
+
+.nt-row__icon {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-hover);
+  border-radius: var(--radius-md);
+  font-size: 16px;
+}
+
+.nt-row__content {
+  flex: 1;
+  min-width: 0;
+}
+
+.nt-row__title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: 2px;
+}
+
+.nt-row--unread .nt-row__title {
+  font-weight: 700;
+}
+
+.nt-row__message {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  margin-bottom: 4px;
+  line-height: 1.4;
+}
+
+.nt-row__time {
+  font-size: 11px;
+  color: var(--color-text-secondary);
+}
+
+.nt-row__archive {
+  flex-shrink: 0;
+  padding: var(--space-1) var(--space-2);
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.nt-row__archive:hover {
+  background: var(--color-danger-subtle, #fef2f2);
+  color: var(--color-danger);
+  border-color: var(--color-danger);
+}
+
+.nt-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  padding: var(--space-12) var(--space-4);
+  text-align: center;
+  color: var(--color-text-secondary);
+}
+
+.nt-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  margin-top: var(--space-6);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-border);
+}
+
+.nt-pagination__btn {
+  padding: var(--space-2) var(--space-4);
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.nt-pagination__btn:hover:not(:disabled) {
+  background: var(--color-hover);
+}
+
+.nt-pagination__btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.nt-pagination__info {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}

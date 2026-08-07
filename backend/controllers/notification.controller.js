@@ -14,10 +14,11 @@ const SORT_MAP = {
 const buildListFilter = (userId, { unreadOnly = false, archived = false }) => {
   const filter = { recipientId: userId };
   const isArchived = archived === true || archived === 'true';
+  const isUnreadOnly = unreadOnly === true || unreadOnly === 'true';
 
   filter.archived = isArchived;
 
-  if (unreadOnly) {
+  if (isUnreadOnly) {
     filter.read = false;
   }
 

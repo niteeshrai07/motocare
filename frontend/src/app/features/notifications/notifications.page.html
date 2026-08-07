@@ -1,0 +1,122 @@
+<div class="nt-page">
+  @if (serverError()) {
+    <div class="nt-error" role="alert">
+      {{ serverError() }}
+    </div>
+  }
+
+  @if (successMessage()) {
+    <div class="nt-success" role="alert">
+      {{ successMessage() }}
+    </div>
+  }
+
+  <div class="nt-header">
+    <div class="nt-header__left">
+      <h1 class="nt-header__title">Notifications</h1>
+      @if (unreadCount() > 0 && !isLoading()) {
+        <span class="nt-header__badge">{{ unreadCount() }} unread</span>
+      }
+    </div>
+    @if (unreadCount() > 0 && !isLoading()) {
+      <app-button
+        type="button"
+        variant="outline"
+        size="sm"
+        (click)="markAllRead()"
+        [disabled]="isActionLoading()"
+      >
+        {{ isActionLoading() ? 'Marking...' : 'Mark all as read' }}
+      </app-button>
+    }
+  </div>
+
+  <div class="nt-tabs">
+    <button
+      type="button"
+      class="nt-tab"
+      [class.nt-tab--active]="activeTab() === 'all'"
+      (click)="setTab('all')"
+    >
+      All
+    </button>
+    <button
+      type="button"
+      class="nt-tab"
+      [class.nt-tab--active]="activeTab() === 'unread'"
+      (click)="setTab('unread')"
+    >
+      Unread
+    </button>
+  </div>
+
+  @if (isLoading()) {
+    <div class="nt-list">
+      @for (i of [1, 2, 3]; track $index) {
+        <div class="nt-row nt-row--skeleton">
+          <div class="skeleton skeleton__row"></div>
+          <div class="skeleton skeleton__row skeleton__row--short"></div>
+        </div>
+      }
+    </div>
+  } @else if (serverError()) {
+    <div class="nt-empty">
+      <p>{{ serverError() }}</p>
+      <app-button type="button" variant="primary" (click)="loadNotifications()">Retry</app-button>
+    </div>
+  } @else if (notifications().length === 0) {
+    <div class="nt-empty">
+      <p>No notifications</p>
+    </div>
+  } @else {
+    <div class="nt-list">
+      @for (notification of notifications(); track notification.id) {
+        <div
+          class="nt-row"
+          [class.nt-row--unread]="!notification.read"
+          (click)="onRowClick(notification)"
+        >
+          <div class="nt-row__icon">
+            <span class="nt-icon">{{ getNotificationIcon(notification.type) }}</span>
+          </div>
+          <div class="nt-row__content">
+            <div class="nt-row__title">{{ notification.title }}</div>
+            <div class="nt-row__message">{{ notification.message }}</div>
+            <div class="nt-row__time">{{ formatRelativeTime(notification.createdAt) }}</div>
+          </div>
+          <button
+            type="button"
+            class="nt-row__archive"
+            (click)="archive(notification, $event)"
+            [disabled]="isActionLoading()"
+            aria-label="Archive notification"
+          >
+            Archive
+          </button>
+        </div>
+      }
+    </div>
+
+    @if (totalPages() > 1) {
+      <div class="nt-pagination">
+        <button
+          type="button"
+          class="nt-pagination__btn"
+          (click)="prevPage()"
+          [disabled]="page() === 1"
+        >
+          Previous
+        </button>
+        <span class="nt-pagination__info">Page {{ page() }} of {{ totalPages() }}</span>
+        <button
+          type="button"
+          class="nt-pagination__btn"
+          (click)="nextPage()"
+          [disabled]="page() === totalPages()"
+        >
+          Next
+        </button>
+      </div>
+    }
+  }
+</div>
