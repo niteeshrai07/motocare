@@ -1,0 +1,70 @@
+<div class="admin-dashboard">
+  <h1 class="admin-dashboard__title">Admin Dashboard</h1>
+
+  @if (isLoading()) {
+    <div class="admin-dashboard__loading">
+      <app-spinner size="lg"></app-spinner>
+    </div>
+  } @else if (error()) {
+    <div class="admin-dashboard__error" role="alert">
+      <p>{{ error() }}</p>
+      <app-button type="button" variant="primary" (click)="loadDashboard()">Retry</app-button>
+    </div>
+  } @else {
+    <div class="admin-dashboard__sections">
+      <app-card title="Platform" subtitle="User statistics">
+        <div class="admin-stats-grid">
+          <div class="admin-stat">
+            <span class="admin-stat__value">{{ overview()?.totalUsers ?? 0 }}</span>
+            <span class="admin-stat__label">Total Users</span>
+          </div>
+          <div class="admin-stat">
+            <span class="admin-stat__value">{{ overview()?.totalCustomers ?? 0 }}</span>
+            <span class="admin-stat__label">Customers</span>
+          </div>
+          <div class="admin-stat">
+            <span class="admin-stat__value">{{ overview()?.totalMechanics ?? 0 }}</span>
+            <span class="admin-stat__label">Mechanics</span>
+          </div>
+          <div class="admin-stat">
+            <span class="admin-stat__value">{{ overview()?.totalAdmins ?? 0 }}</span>
+            <span class="admin-stat__label">Admins</span>
+          </div>
+        </div>
+      </app-card>
+
+      <app-card title="Operations" subtitle="Platform activity">
+        <div class="admin-stats-grid">
+          <div class="admin-stat">
+            <span class="admin-stat__value">{{ overview()?.pendingShops ?? 0 }}</span>
+            <span class="admin-stat__label">Pending Repair Shops</span>
+          </div>
+          <div class="admin-stat">
+            <span class="admin-stat__value">{{ overview()?.verifiedShops ?? 0 }}</span>
+            <span class="admin-stat__label">Verified Repair Shops</span>
+          </div>
+          <div class="admin-stat">
+            <span class="admin-stat__value">{{ overview()?.pendingRequests ?? 0 }}</span>
+            <span class="admin-stat__label">Pending Service Requests</span>
+          </div>
+          <div class="admin-stat">
+            <span class="admin-stat__value">{{ activeServiceRequests }}</span>
+            <span class="admin-stat__label">Active Service Requests</span>
+          </div>
+          <div class="admin-stat">
+            <span class="admin-stat__value">{{ overview()?.completedRequests ?? 0 }}</span>
+            <span class="admin-stat__label">Completed Service Requests</span>
+          </div>
+          <div class="admin-stat">
+            <span class="admin-stat__value">{{ overview()?.totalReviews ?? 0 }}</span>
+            <span class="admin-stat__label">Total Reviews</span>
+          </div>
+          <div class="admin-stat">
+            <span class="admin-stat__value">{{ overview()?.averagePlatformRating ?? 0 }}</span>
+            <span class="admin-stat__label">Average Rating</span>
+          </div>
+        </div>
+      </app-card>
+    </div>
+  }
+</div>

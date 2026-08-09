@@ -1,0 +1,149 @@
+<div class="admin-reviews">
+  <h1 class="admin-reviews__title">Reviews</h1>
+
+  @if (error()) {
+    <div class="admin-reviews__error" role="alert">
+      <p>{{ error() }}</p>
+      <app-button type="button" variant="primary" (click)="loadReviews()">Retry</app-button>
+    </div>
+  }
+
+  <app-card>
+    <div class="admin-reviews__toolbar">
+      <div class="admin-reviews__sort">
+        @for (sort of SORT_OPTIONS; track sort) {
+          <button
+            type="button"
+            class="admin-filter-btn"
+            [class.admin-filter-btn--active]="currentSort() === sort"
+            (click)="setSort(sort)"
+          >
+            {{ getSortLabel(sort) }}
+          </button>
+        }
+      </div>
+      <div class="admin-reviews__search">
+        <input
+          type="text"
+          class="admin-search-input"
+          placeholder="Search reviews..."
+          (input)="onSearchInput($event)"
+          [value]="searchQuery()"
+        />
+      </div>
+    </div>
+
+    @if (isLoading()) {
+      <div class="admin-reviews__loading">
+        <app-spinner size="lg"></app-spinner>
+      </div>
+    } @else if (items().length === 0) {
+      <div class="admin-reviews__empty">
+        <p>No reviews found.</p>
+      </div>
+    } @else {
+      <div class="admin-reviews__list">
+        @for (review of items(); track review.id) {
+          <div class="admin-review-row">
+            <div class="admin-review-row__main">
+              <div class="admin-review-row__header">
+                <span class="admin-review-row__rating">{{ getStars(review.rating) }}</span>
+                <span class="admin-review-row__score">{{ review.rating }} / 5</span>
+              </div>
+              <div class="admin-review-row__details">
+                @if (review.customer) {
+                  <span>Customer: {{ review.customer.name }}</span>
+                }
+                @if (review.shop) {
+                  <span>Shop: {{ review.shop.shopName }}</span>
+                }
+                @if (review.comment) {
+                  <span class="admin-review-row__comment">"{{ review.comment }}"</span>
+                }
+                <span>Created: {{ formatDate(review.createdAt) }}</span>
+              </div>
+            </div>
+            <div class="admin-review-row__actions">
+              <app-button
+                type="button"
+                variant="secondary"
+                size="sm"
+                (click)="openDetail(review)"
+              >
+                View Details
+              </app-button>
+            </div>
+          </div>
+        }
+      </div>
+
+      @if (totalPages() > 1) {
+        <div class="admin-reviews__pagination">
+          <button
+            type="button"
+            class="admin-pagination__btn"
+            (click)="prevPage()"
+            [disabled]="page() <= 1"
+          >
+            Previous
+          </button>
+          <span class="admin-pagination__info">Page {{ page() }} of {{ totalPages() }}</span>
+          <button
+            type="button"
+            class="admin-pagination__btn"
+            (click)="nextPage()"
+            [disabled]="page() >= totalPages()"
+          >
+            Next
+          </button>
+        </div>
+      }
+    }
+  </app-card>
+
+  <app-dialog [open]="isDetailOpen()" [title]="'Review Details'">
+    @if (selectedReview()) {
+      <div class="admin-review-detail">
+        <div class="admin-review-detail__row">
+          <span class="admin-review-detail__label">Customer:</span>
+          <span>{{ selectedReview()!.customer?.name || 'N/A' }}</span>
+        </div>
+        <div class="admin-review-detail__row">
+          <span class="admin-review-detail__label">Shop:</span>
+          <span>{{ selectedReview()!.shop?.shopName || 'N/A' }}</span>
+        </div>
+        <div class="admin-review-detail__row">
+          <span class="admin-review-detail__label">Rating:</span>
+          <span>{{ getStars(selectedReview()!.rating) }} {{ selectedReview()!.rating }} / 5</span>
+        </div>
+        <div class="admin-review-detail__row">
+          <span class="admin-review-detail__label">Comment:</span>
+          <span>{{ selectedReview()!.comment || 'No comment' }}</span>
+        </div>
+        <div class="admin-review-detail__row">
+          <span class="admin-review-detail__label">Created:</span>
+          <span>{{ formatDate(selectedReview()!.createdAt) }}</span>
+        </div>
+        <div class="admin-review-detail__row">
+          <span class="admin-review-detail__label">Updated:</span>
+          <span>{{ formatDate(selectedReview()!.updatedAt) }}</span>
+        </div>
+        @if (selectedReview()!.serviceRequestId) {
+          <div class="admin-review-detail__row">
+            <span class="admin-review-detail__label">Service Request:</span>
+            <span>{{ selectedReview()!.serviceRequestId }}</span>
+          </div>
+        }
+      </div>
+    }
+    <div dialog-footer>
+      <app-button
+        type="button"
+        variant="secondary"
+        (click)="closeDetail()"
+      >
+        Close
+      </app-button>
+    </div>
+  </app-dialog>
+</div>

@@ -1,0 +1,102 @@
+<div class="admin-service-requests">
+  <h1 class="admin-service-requests__title">Service Requests</h1>
+
+  @if (error()) {
+    <div class="admin-service-requests__error" role="alert">
+      <p>{{ error() }}</p>
+      <app-button type="button" variant="primary" (click)="loadRequests()">Retry</app-button>
+    </div>
+  }
+
+  <app-card>
+    <div class="admin-service-requests__toolbar">
+      <div class="admin-service-requests__filters">
+        @for (status of ['all', ...STATUS_FILTERS]; track status) {
+          <button
+            type="button"
+            class="admin-filter-btn"
+            [class.admin-filter-btn--active]="currentFilter() === status"
+            (click)="setStatusFilter(status)"
+          >
+            {{ status === 'all' ? 'All' : formatStatus(status) }}
+          </button>
+        }
+      </div>
+      <div class="admin-service-requests__search">
+        <input
+          type="text"
+          class="admin-search-input"
+          placeholder="Search requests..."
+          (input)="onSearchInput($event)"
+          [value]="searchQuery()"
+        />
+      </div>
+    </div>
+
+    @if (isLoading()) {
+      <div class="admin-service-requests__loading">
+        <app-spinner size="lg"></app-spinner>
+      </div>
+    } @else if (items().length === 0) {
+      <div class="admin-service-requests__empty">
+        <p>No service requests found.</p>
+      </div>
+    } @else {
+      <div class="admin-service-requests__list">
+        @for (req of items(); track req.id) {
+          <div class="admin-request-row">
+            <div class="admin-request-row__main">
+              <div class="admin-request-row__header">
+                <span class="admin-request-row__id">{{ req.id }}</span>
+                <app-request-status-badge [status]="req.status"></app-request-status-badge>
+              </div>
+              <div class="admin-request-row__details">
+                @if (req.customer) {
+                  <span>Customer: {{ req.customer.name }}</span>
+                }
+                @if (req.shop) {
+                  <span>Shop: {{ req.shop.shopName }}</span>
+                }
+                <span>Vehicle: {{ vehicleLabel(req.vehicleType) }}</span>
+                <span>Created: {{ formatDate(req.createdAt) }}</span>
+                <span>Updated: {{ formatDate(req.updatedAt) }}</span>
+              </div>
+            </div>
+            <div class="admin-request-row__actions">
+              <app-button
+                type="button"
+                variant="secondary"
+                size="sm"
+                (click)="viewDetails(req.id)"
+              >
+                View Details
+              </app-button>
+            </div>
+          </div>
+        }
+      </div>
+
+      @if (totalPages() > 1) {
+        <div class="admin-service-requests__pagination">
+          <button
+            type="button"
+            class="admin-pagination__btn"
+            (click)="prevPage()"
+            [disabled]="page() <= 1"
+          >
+            Previous
+          </button>
+          <span class="admin-pagination__info">Page {{ page() }} of {{ totalPages() }}</span>
+          <button
+            type="button"
+            class="admin-pagination__btn"
+            (click)="nextPage()"
+            [disabled]="page() >= totalPages()"
+          >
+            Next
+          </button>
+        </div>
+      }
+    }
+  </app-card>
+</div>

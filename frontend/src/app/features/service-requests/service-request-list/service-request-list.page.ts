@@ -68,7 +68,8 @@ export class ServiceRequestListPageComponent {
   ) {
     effect(() => {
       const user = this.authService.user();
-      if (user && !this.hasLoaded()) {
+      const role = user?.role;
+      if ((role === 'customer' || role === 'mechanic') && !this.hasLoaded()) {
         this.hasLoaded.set(true);
         this.loadRequests();
       }

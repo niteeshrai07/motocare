@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { AppShellComponent } from './layouts/app-shell/app-shell.component';
 import { authGuard } from './core/guards/auth.guard';
 import { mechanicGuard } from './core/guards/mechanic.guard';
+import { adminGuard } from './core/guards/admin.guard';
 
 export const routes: Routes = [
   {
@@ -42,6 +43,33 @@ export const routes: Routes = [
       {
         path: 'notifications',
         loadComponent: () => import('./features/notifications/notifications.page').then((m) => m.NotificationsPageComponent),
+      },
+      {
+        path: 'admin',
+        canActivate: [adminGuard],
+        children: [
+          { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+          {
+            path: 'dashboard',
+            loadComponent: () => import('./features/admin-dashboard/admin-dashboard.page').then((m) => m.AdminDashboardPageComponent),
+          },
+          {
+            path: 'repair-shops',
+            loadComponent: () => import('./features/admin-repair-shops/admin-repair-shops.page').then((m) => m.AdminRepairShopsPageComponent),
+          },
+          {
+            path: 'users',
+            loadComponent: () => import('./features/admin-users/admin-users.page').then((m) => m.AdminUsersPageComponent),
+          },
+          {
+            path: 'service-requests',
+            loadComponent: () => import('./features/admin-service-requests/admin-service-requests.page').then((m) => m.AdminServiceRequestsPageComponent),
+          },
+          {
+            path: 'reviews',
+            loadComponent: () => import('./features/admin-reviews/admin-reviews.page').then((m) => m.AdminReviewsPageComponent),
+          },
+        ],
       },
     ],
   },

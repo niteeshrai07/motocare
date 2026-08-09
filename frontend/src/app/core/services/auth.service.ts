@@ -1,7 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { Observable } from 'rxjs';
+import { Observable, firstValueFrom } from 'rxjs';
 import { ApiResponse } from '../models/api-response.model';
 import { LoginCredentials, RegisterCredentials } from '../models/auth.model';
 import { User } from '../models/user.model';
@@ -16,11 +16,22 @@ export class AuthService {
 
   constructor(private http: HttpClient, private router: Router) {}
 
-  restoreSession(): void {
+  restoreSession(): Promise<void> {
     const token = this.getToken();
-    if (token) {
-      this.loadCurrentUser();
+    if (!token) {
+      return Promise.resolve();
     }
+
+    return firstValueFrom(this.getCurrentUser()).then(
+      (response) => {
+        if (response.success && response.data) {
+          this.currentUser.set(response.data.user);
+        }
+      },
+      () => {
+        this.currentUser.set(null);
+      }
+    );
   }
 
   login(credentials: LoginCredentials): Observable<ApiResponse<{ user: User; token: string }>> {
@@ -53,19 +64,6 @@ export class AuthService {
 
   isAuthenticated(): boolean {
     return !!this.getToken();
-  }
-
-  private loadCurrentUser(): void {
-    this.getCurrentUser().subscribe({
-      next: (response) => {
-        if (response.success && response.data) {
-          this.currentUser.set(response.data.user);
-        }
-      },
-      error: () => {
-        this.currentUser.set(null);
-      },
-    });
   }
 
   persistSession(token: string, user: User | null): void {

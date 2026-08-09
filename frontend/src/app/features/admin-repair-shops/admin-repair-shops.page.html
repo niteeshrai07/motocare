@@ -1,0 +1,141 @@
+<div class="admin-repair-shops">
+  <h1 class="admin-repair-shops__title">Repair Shops</h1>
+
+  @if (successMessage()) {
+    <div class="admin-repair-shops__success" role="alert">
+      {{ successMessage() }}
+    </div>
+  }
+
+  @if (error()) {
+    <div class="admin-repair-shops__error" role="alert">
+      <p>{{ error() }}</p>
+      <app-button type="button" variant="primary" (click)="loadShops()">Retry</app-button>
+    </div>
+  }
+
+  <app-card>
+    <div class="admin-repair-shops__toolbar">
+      <div class="admin-repair-shops__filters">
+        @for (filter of ['all', 'pending', 'verified', 'rejected']; track filter) {
+          <button
+            type="button"
+            class="admin-filter-btn"
+            [class.admin-filter-btn--active]="activeFilter() === filter"
+            (click)="setFilter(filter)"
+          >
+            {{ filter === 'all' ? 'All' : filter.charAt(0).toUpperCase() + filter.slice(1) }}
+          </button>
+        }
+      </div>
+      <div class="admin-repair-shops__search">
+        <input
+          type="text"
+          class="admin-search-input"
+          placeholder="Search shops..."
+          (input)="onSearchInput($event)"
+          [value]="searchQuery()"
+        />
+      </div>
+    </div>
+
+    @if (isLoading()) {
+      <div class="admin-repair-shops__loading">
+        <app-spinner size="lg"></app-spinner>
+      </div>
+    } @else if (items().length === 0) {
+      <div class="admin-repair-shops__empty">
+        <p>No repair shops found.</p>
+      </div>
+    } @else {
+      <div class="admin-repair-shops__list">
+        @for (shop of items(); track shop.id) {
+          <div class="admin-shop-row">
+            <div class="admin-shop-row__main">
+              <div class="admin-shop-row__header">
+                <span class="admin-shop-row__name">{{ shop.shopName }}</span>
+                <app-verification-badge [status]="shop.status"></app-verification-badge>
+              </div>
+              <div class="admin-shop-row__details">
+                @if (shop.owner) {
+                  <span>Owner: {{ shop.owner.name }}</span>
+                  <span>Phone: {{ shop.owner.phone }}</span>
+                }
+                <span>Types: {{ formatVehicleTypes(shop.vehicleTypesServiced) }}</span>
+                <span>Rating: {{ shop.rating }} / 5</span>
+                <span>Created: {{ formatDate(shop.createdAt) }}</span>
+              </div>
+            </div>
+            <div class="admin-shop-row__actions">
+              @if (shop.status === 'pending') {
+                <app-button
+                  type="button"
+                  variant="primary"
+                  size="sm"
+                  (click)="openVerifyDialog(shop)"
+                  [disabled]="actionInProgress()"
+                >
+                  Verify
+                </app-button>
+                <app-button
+                  type="button"
+                  variant="danger"
+                  size="sm"
+                  (click)="openRejectDialog(shop)"
+                  [disabled]="actionInProgress()"
+                >
+                  Reject
+                </app-button>
+              }
+            </div>
+          </div>
+        }
+      </div>
+
+      @if (totalPages() > 1) {
+        <div class="admin-repair-shops__pagination">
+          <button
+            type="button"
+            class="admin-pagination__btn"
+            (click)="prevPage()"
+            [disabled]="page() <= 1"
+          >
+            Previous
+          </button>
+          <span class="admin-pagination__info">Page {{ page() }} of {{ totalPages() }}</span>
+          <button
+            type="button"
+            class="admin-pagination__btn"
+            (click)="nextPage()"
+            [disabled]="page() >= totalPages()"
+          >
+            Next
+          </button>
+        </div>
+      }
+    }
+  </app-card>
+
+  <app-dialog [open]="isDialogOpen" [title]="dialogTitle">
+    <p>{{ dialogBody }}</p>
+    <div dialog-footer>
+      <app-button
+        type="button"
+        variant="secondary"
+        (click)="closeDialog()"
+        [disabled]="actionInProgress()"
+      >
+        Cancel
+      </app-button>
+      <app-button
+        type="button"
+        [variant]="confirmButtonVariant"
+        (click)="confirmAction()"
+        [disabled]="actionInProgress()"
+        [loading]="actionInProgress()"
+      >
+        {{ actionInProgress() ? 'Saving...' : confirmButtonLabel }}
+      </app-button>
+    </div>
+  </app-dialog>
+</div>

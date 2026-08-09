@@ -21,6 +21,10 @@ export class AppShellComponent {
     return this.auth.user()?.role === 'mechanic';
   });
 
+  protected readonly isAdmin = computed(() => {
+    return this.auth.user()?.role === 'admin';
+  });
+
   protected readonly unreadCount = computed(() => {
     return this.notificationService.unreadCount();
   });

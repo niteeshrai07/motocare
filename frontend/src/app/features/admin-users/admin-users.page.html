@@ -1,0 +1,153 @@
+<div class="admin-users">
+  <h1 class="admin-users__title">Users</h1>
+
+  @if (successMessage()) {
+    <div class="admin-users__success" role="alert">
+      {{ successMessage() }}
+    </div>
+  }
+
+  @if (error()) {
+    <div class="admin-users__error" role="alert">
+      <p>{{ error() }}</p>
+      <app-button type="button" variant="primary" (click)="loadUsers()">Retry</app-button>
+    </div>
+  }
+
+  <app-card>
+    <div class="admin-users__toolbar">
+      <div class="admin-users__filters">
+        <div class="admin-users__role-filters">
+          @for (role of ['all', 'customer', 'mechanic', 'admin']; track role) {
+            <button
+              type="button"
+              class="admin-filter-btn"
+              [class.admin-filter-btn--active]="roleFilter() === role"
+              (click)="setRoleFilter(role)"
+            >
+              {{ role === 'all' ? 'All' : role.charAt(0).toUpperCase() + role.slice(1) }}
+            </button>
+          }
+        </div>
+        <div class="admin-users__status-filters">
+          @for (status of ['all', 'active', 'inactive']; track status) {
+            <button
+              type="button"
+              class="admin-filter-btn"
+              [class.admin-filter-btn--active]="statusFilter() === status"
+              (click)="setStatusFilter(status)"
+            >
+              {{ status === 'all' ? 'All Status' : status.charAt(0).toUpperCase() + status.slice(1) }}
+            </button>
+          }
+        </div>
+      </div>
+      <div class="admin-users__search">
+        <input
+          type="text"
+          class="admin-search-input"
+          placeholder="Search users..."
+          (input)="onSearchInput($event)"
+          [value]="searchQuery()"
+        />
+      </div>
+    </div>
+
+    @if (isLoading()) {
+      <div class="admin-users__loading">
+        <app-spinner size="lg"></app-spinner>
+      </div>
+    } @else if (items().length === 0) {
+      <div class="admin-users__empty">
+        <p>No users found.</p>
+      </div>
+    } @else {
+      <div class="admin-users__list">
+        @for (user of items(); track user.id) {
+          <div class="admin-user-row">
+            <div class="admin-user-row__main">
+              <div class="admin-user-row__header">
+                <span class="admin-user-row__name">{{ user.name }}</span>
+                <span class="admin-user-row__role">{{ user.role }}</span>
+              </div>
+              <div class="admin-user-row__details">
+                <span>Email: {{ user.email }}</span>
+                <span>Phone: {{ user.phone }}</span>
+                <span>Status: {{ user.isActive ? 'Active' : 'Inactive' }}</span>
+                <span>Created: {{ formatDate(user.createdAt) }}</span>
+              </div>
+            </div>
+            <div class="admin-user-row__actions">
+              @if (user.isActive && user.id !== currentUserId()) {
+                <app-button
+                  type="button"
+                  variant="danger"
+                  size="sm"
+                  (click)="openDeactivateDialog(user)"
+                  [disabled]="actionInProgress()"
+                >
+                  Deactivate
+                </app-button>
+              } @else if (!user.isActive) {
+                <app-button
+                  type="button"
+                  variant="primary"
+                  size="sm"
+                  (click)="openActivateDialog(user)"
+                  [disabled]="actionInProgress()"
+                >
+                  Activate
+                </app-button>
+              }
+            </div>
+          </div>
+        }
+      </div>
+
+      @if (totalPages() > 1) {
+        <div class="admin-users__pagination">
+          <button
+            type="button"
+            class="admin-pagination__btn"
+            (click)="prevPage()"
+            [disabled]="page() <= 1"
+          >
+            Previous
+          </button>
+          <span class="admin-pagination__info">Page {{ page() }} of {{ totalPages() }}</span>
+          <button
+            type="button"
+            class="admin-pagination__btn"
+            (click)="nextPage()"
+            [disabled]="page() >= totalPages()"
+          >
+            Next
+          </button>
+        </div>
+      }
+    }
+  </app-card>
+
+  <app-dialog [open]="isDialogOpen" [title]="dialogTitle">
+    <p>{{ dialogBody }}</p>
+    <div dialog-footer>
+      <app-button
+        type="button"
+        variant="secondary"
+        (click)="closeDialog()"
+        [disabled]="actionInProgress()"
+      >
+        Cancel
+      </app-button>
+      <app-button
+        type="button"
+        [variant]="confirmButtonVariant"
+        (click)="confirmAction()"
+        [disabled]="actionInProgress()"
+        [loading]="actionInProgress()"
+      >
+        {{ actionInProgress() ? 'Saving...' : confirmButtonLabel }}
+      </app-button>
+    </div>
+  </app-dialog>
+</div>

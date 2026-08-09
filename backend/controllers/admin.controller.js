@@ -256,6 +256,83 @@ const getUserById = async (req, res) => {
   }
 };
 
+const activateUser = async (req, res) => {
+  try {
+    const user = await User.findByIdAndUpdate(
+      req.params.id,
+      { isActive: true },
+      { new: true }
+    );
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found',
+        data: null,
+        errors: null,
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: 'User activated successfully',
+      data: { user: buildAdminUserDetail(user) },
+      errors: null,
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({
+      success: false,
+      message: 'Something went wrong while activating the user',
+      data: null,
+      errors: null,
+    });
+  }
+};
+
+const deactivateUser = async (req, res) => {
+  try {
+    if (req.user._id.toString() === req.params.id) {
+      return res.status(400).json({
+        success: false,
+        message: 'You cannot deactivate your own account',
+        data: null,
+        errors: null,
+      });
+    }
+
+    const user = await User.findByIdAndUpdate(
+      req.params.id,
+      { isActive: false },
+      { new: true }
+    );
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found',
+        data: null,
+        errors: null,
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: 'User deactivated successfully',
+      data: { user: buildAdminUserDetail(user) },
+      errors: null,
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({
+      success: false,
+      message: 'Something went wrong while deactivating the user',
+      data: null,
+      errors: null,
+    });
+  }
+};
+
 const getAllRepairShops = async (req, res) => {
   try {
     const {
@@ -553,6 +630,8 @@ module.exports = {
   getDashboard,
   getAllUsers,
   getUserById,
+  activateUser,
+  deactivateUser,
   getAllRepairShops,
   getRepairShopDetail,
   verifyRepairShop,

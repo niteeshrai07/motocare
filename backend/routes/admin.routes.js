@@ -19,6 +19,8 @@ const {
   getDashboard,
   getAllUsers,
   getUserById,
+  activateUser,
+  deactivateUser,
   getAllRepairShops,
   getRepairShopDetail,
   verifyRepairShop,
@@ -52,6 +54,24 @@ router.get(
   getUserIdValidator,
   handleValidationErrors,
   getUserById
+);
+
+router.patch(
+  '/users/:id/activate',
+  verifyToken,
+  authorizeRoles('admin'),
+  getUserIdValidator,
+  handleValidationErrors,
+  activateUser
+);
+
+router.patch(
+  '/users/:id/deactivate',
+  verifyToken,
+  authorizeRoles('admin'),
+  getUserIdValidator,
+  handleValidationErrors,
+  deactivateUser
 );
 
 router.get(

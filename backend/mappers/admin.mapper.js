@@ -5,6 +5,7 @@ const buildAdminUserListItem = (user) => {
     email: user.email,
     phone: user.phone,
     role: user.role,
+    isActive: user.isActive,
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
   };
