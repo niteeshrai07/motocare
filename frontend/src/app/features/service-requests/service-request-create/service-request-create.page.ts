@@ -1,4 +1,5 @@
 import { Component, signal, computed, effect } from '@angular/core';
+import { DecimalPipe } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators, FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
 import { finalize } from 'rxjs';
@@ -7,7 +8,6 @@ import { ServiceRequestService } from '../../../core/services/service-request.se
 import { AuthService } from '../../../core/services/auth.service';
 import { ServiceRequest, VehicleType } from '../../../core/models/service-request.model';
 import { ApiResponse } from '../../../core/models/api-response.model';
-import { CardComponent } from '../../../shared/components/card/card.component';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
 import { ShopSelectorComponent } from './shop-selector/shop-selector.component';
 
@@ -21,7 +21,7 @@ const VEHICLE_TYPES: { value: VehicleType; label: string; icon: string }[] = [
   standalone: true,
   imports: [
     ReactiveFormsModule,
-    CardComponent,
+    DecimalPipe,
     ButtonComponent,
     ShopSelectorComponent,
   ],

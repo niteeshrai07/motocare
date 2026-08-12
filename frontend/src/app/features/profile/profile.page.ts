@@ -1,7 +1,8 @@
-import { Component, signal, OnInit } from '@angular/core';
+import { Component, signal, computed, OnInit } from '@angular/core';
+import { DatePipe, TitleCasePipe } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
 import { finalize } from 'rxjs';
-import { CardComponent } from '../../shared/components/card/card.component';
 import { ButtonComponent } from '../../shared/components/button/button.component';
 import { InputComponent } from '../../shared/components/input/input.component';
 import { ProfileService } from '../../core/services/profile.service';
@@ -12,7 +13,7 @@ import { Profile, ProfileUpdatePayload } from '../../core/models/profile.model';
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [ReactiveFormsModule, CardComponent, ButtonComponent, InputComponent],
+  imports: [ReactiveFormsModule, RouterLink, ButtonComponent, InputComponent, DatePipe, TitleCasePipe],
   templateUrl: './profile.page.html',
   styleUrl: './profile.page.scss',
 })
@@ -27,9 +28,14 @@ export class ProfilePageComponent implements OnInit {
   protected readonly submitted = signal<boolean>(false);
   protected readonly isDeactivating = signal<boolean>(false);
 
+  /** Role helpers for template quick-actions */
+  protected readonly isMechanic = computed(() => this.authService.user()?.role === 'mechanic');
+  protected readonly isAdmin    = computed(() => this.authService.user()?.role === 'admin');
+
   protected form: FormGroup;
   protected passwordForm: FormGroup;
   protected deactivationControl: FormControl<string | null>;
+
 
   constructor(
     private readonly fb: FormBuilder,
@@ -132,6 +138,10 @@ export class ProfilePageComponent implements OnInit {
           this.serverError.set(error.message || 'Failed to deactivate account');
         },
       });
+  }
+
+  protected logout(): void {
+    this.authService.logout();
   }
 
   protected get nameError(): string {

@@ -1,174 +1,172 @@
+/* ============================================================
+   MotoCare — Global Design Tokens & Base Styles
+   Fonts: DM Sans (body) + Inter Tight (headings)
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Inter+Tight:wght@600;700;800&display=swap');
+
 :root {
-  --color-primary: #1a3a5c;
-  --color-primary-light: #2a5a8c;
-  --color-primary-dark: #0f2440;
+  /* ── Core palette ──────────────────────────────────────── */
+  --color-primary:        #1a3a5c;
+  --color-primary-light:  #2a5a8c;
+  --color-primary-dark:   #0f2440;
   --color-primary-subtle: #e8f0f8;
 
-  --color-secondary: #f59e0b;
-  --color-secondary-light: #fbbf24;
-  --color-secondary-dark: #d97706;
+  --color-secondary:        #f59e0b;
+  --color-secondary-light:  #fbbf24;
+  --color-secondary-dark:   #d97706;
   --color-secondary-subtle: #fef3c7;
 
-  --color-success: #10b981;
-  --color-warning: #f59e0b;
-  --color-danger: #ef4444;
-  --color-danger-subtle: #fef2f2;
-  --color-info: #3b82f6;
+  --color-success:        #10b981;
+  --color-success-subtle: #ecfdf5;
+  --color-warning:        #f59e0b;
+  --color-danger:         #ef4444;
+  --color-danger-subtle:  #fef2f2;
+  --color-info:           #3b82f6;
+  --color-info-subtle:    #eff6ff;
 
-  --color-bg: #f9fafb;
-  --color-surface: #ffffff;
-  --color-border: #e5e7eb;
-  --color-border-focus: #1a3a5c;
-  --color-text: #111827;
-  --color-text-secondary: #4b5563;
-  --color-text-muted: #9ca3af;
-  --color-text-inverse: #ffffff;
+  /* ── Semantic dashboard colors ─────────────────────────── */
+  --color-indigo:         #4f46e5;
+  --color-indigo-light:   #6366f1;
+  --color-indigo-subtle:  #eef2ff;
+  --color-amber:          #f59e0b;
+  --color-amber-subtle:   #fffbeb;
 
-  --color-hover: #f3f4f6;
-  --color-focus-ring: #1a3a5c;
+  /* ── Surface & background ──────────────────────────────── */
+  --color-bg:              #f6f7fb;
+  --color-surface:         #ffffff;
+  --color-border:          #e7eaf0;
+  --color-border-focus:    #4f46e5;
+
+  /* ── Text ──────────────────────────────────────────────── */
+  --color-text:            #111827;
+  --color-text-secondary:  #334155;
+  --color-text-muted:      #64748b;
+  --color-text-soft:       #94a3b8;
+  --color-text-inverse:    #ffffff;
+
+  /* ── Interaction ───────────────────────────────────────── */
+  --color-hover:          #f1f3f7;
+  --color-focus-ring:     #4f46e5;
   --color-focus-ring-offset: 2px;
 
-  --font-heading: 'Inter Tight', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+  /* ── Sidebar ───────────────────────────────────────────── */
+  --sidebar-bg:           linear-gradient(180deg, #091a30, #0c2340);
+  --sidebar-width:        248px;
+  --sidebar-active-bg:    linear-gradient(90deg, rgba(99,102,241,0.22), rgba(99,102,241,0.09));
+  --sidebar-active-shadow: inset 3px 0 #6366f1;
+  --sidebar-hover-bg:     rgba(255, 255, 255, 0.055);
+  --sidebar-text:         #aebfd2;
+  --sidebar-text-active:  #ffffff;
+  --sidebar-text-muted:   #70859e;
 
-  --space-1: 4px;
-  --space-2: 8px;
-  --space-3: 12px;
-  --space-4: 16px;
-  --space-5: 20px;
-  --space-6: 24px;
-  --space-8: 32px;
+  /* ── Card / panel ──────────────────────────────────────── */
+  --card-radius:   16px;
+  --card-shadow:   0 8px 30px rgba(15, 23, 42, 0.055);
+  --card-border:   1px solid var(--color-border);
+
+  /* ── Topbar ────────────────────────────────────────────── */
+  --topbar-height: 70px;
+
+  /* ── Typography ────────────────────────────────────────── */
+  --font-heading: 'Inter Tight', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-body:    'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono:    'JetBrains Mono', 'Fira Code', monospace;
+
+  /* ── Spacing scale ─────────────────────────────────────── */
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  20px;
+  --space-6:  24px;
+  --space-8:  32px;
   --space-10: 40px;
   --space-12: 48px;
   --space-16: 64px;
 
-  --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
-  --radius-xl: 16px;
+  /* ── Radius ─────────────────────────────────────────────── */
+  --radius-sm:   4px;
+  --radius-md:   8px;
+  --radius-lg:   12px;
+  --radius-xl:   16px;
   --radius-full: 9999px;
 
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 4px 6px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.06);
-  --shadow-xl: 0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05);
+  /* ── Shadows ─────────────────────────────────────────────── */
+  --shadow-sm:  0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md:  0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-lg:  var(--card-shadow);
+  --shadow-xl:  0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05);
   --shadow-none: none;
 
-  --topbar-height: 64px;
-  --sidebar-width: 260px;
+  /* ── Transitions ─────────────────────────────────────────── */
+  --transition-fast:   150ms ease;
+  --transition-normal: 200ms ease;
+  --transition-slow:   250ms ease;
+
+  /* Legacy aliases (keep for shared components) */
   --sidebar-collapsed-width: 64px;
   --footer-height: 40px;
-
-  --transition-fast: 150ms ease;
-  --transition-normal: 200ms ease;
-  --transition-slow: 250ms ease;
 }
 
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
+/* ── Reset ──────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
 
-body {
+html, body {
   margin: 0;
   padding: 0;
-  font-family: var(--font-body);
-  font-size: 16px;
-  font-weight: 400;
-  line-height: 1.5;
-  color: var(--color-text);
-  background-color: var(--color-bg);
+  min-height: 100%;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
+body {
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.55;
+  color: var(--color-text);
+  background: var(--color-bg);
+}
+
+/* ── Headings ───────────────────────────────────────────────── */
+h1, h2, h3, h4, h5, h6 {
   margin: 0;
   font-family: var(--font-heading);
-  font-weight: 600;
-  line-height: 1.2;
+  font-weight: 700;
+  line-height: 1.15;
   color: var(--color-text);
-}
-
-h1 {
-  font-size: 32px;
   letter-spacing: -0.02em;
 }
+h1 { font-size: 32px; letter-spacing: -0.03em; }
+h2 { font-size: 20px; }
+h3 { font-size: 18px; }
+h4 { font-size: 16px; }
+h5 { font-size: 14px; }
+h6 { font-size: 12px; }
 
-h2 {
-  font-size: 24px;
-  letter-spacing: -0.01em;
-}
+p { margin: 0; }
 
-h3 {
-  font-size: 20px;
-}
+a { color: var(--color-primary); text-decoration: none; }
+a:hover { text-decoration: underline; }
 
-h4 {
-  font-size: 16px;
-}
+button { cursor: pointer; font-family: inherit; border: 0; background: none; }
 
-h5 {
-  font-size: 14px;
-}
+input, select, textarea { font-family: inherit; font-size: inherit; }
 
-h6 {
-  font-size: 12px;
-}
+ul, ol { margin: 0; padding: 0; list-style: none; }
 
-p {
-  margin: 0;
-}
+img { max-width: 100%; height: auto; }
 
-a {
-  color: var(--color-primary);
-  text-decoration: none;
-}
-
-a:hover {
-  text-decoration: underline;
-}
-
-button {
-  cursor: pointer;
-  font-family: inherit;
-}
-
-input,
-select,
-textarea {
-  font-family: inherit;
-  font-size: inherit;
-}
-
-ul,
-ol {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-img {
-  max-width: 100%;
-  height: auto;
-}
-
+/* ── Focus ──────────────────────────────────────────────────── */
 :focus-visible {
   outline: 2px solid var(--color-focus-ring);
   outline-offset: var(--color-focus-ring-offset);
 }
 
+/* ── Reduced motion ─────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
+  *, *::before, *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;

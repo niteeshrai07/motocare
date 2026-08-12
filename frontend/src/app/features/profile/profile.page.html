@@ -1,235 +1,423 @@
-<div class="profile-page">
+<div class="dash">
+
+  <!-- ══════════════════════════════════════════
+       GLOBAL ALERTS
+       ══════════════════════════════════════════ -->
   @if (serverError() && !isEditing() && !isChangingPassword()) {
-    <div class="profile-error" role="alert">
+    <div class="dash-alert dash-alert--error" role="alert">
+      <span class="dash-alert__icon" aria-hidden="true">!</span>
       {{ serverError() }}
     </div>
   }
 
   @if (passwordSuccess()) {
-    <div class="profile-success" role="alert">
+    <div class="dash-alert dash-alert--success" role="alert">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
       {{ passwordSuccess() }}
     </div>
   }
 
+  <!-- ══════════════════════════════════════════
+       LOADING
+       ══════════════════════════════════════════ -->
   @if (isLoading()) {
-    <app-card title="Profile" subtitle="Loading your profile...">
-      <div class="skeleton">
-        <div class="skeleton__row"></div>
-        <div class="skeleton__row skeleton__row--short"></div>
-        <div class="skeleton__row"></div>
-        <div class="skeleton__row skeleton__row--short"></div>
+    <div class="skeleton-wrap" aria-label="Loading...">
+      <div class="sk-hero"></div>
+      <div class="sk-stats">
+        <div class="sk-card"></div><div class="sk-card"></div>
+        <div class="sk-card"></div><div class="sk-card"></div>
       </div>
-    </app-card>
-  } @else if (!serverError() && profile() && !isEditing() && !isChangingPassword()) {
-    <app-card title="Profile" subtitle="Manage your profile information">
-      <div class="profile-grid">
-        <div class="profile-field">
-          <span class="profile-field__label">Name</span>
-          <span class="profile-field__value">{{ profile()?.name }}</span>
+      <div class="sk-body">
+        <div class="sk-panel"></div>
+        <div class="sk-side">
+          <div class="sk-panel-sm"></div>
+          <div class="sk-panel-sm"></div>
         </div>
-        <div class="profile-field">
-          <span class="profile-field__label">Email</span>
-          <span class="profile-field__value">{{ profile()?.email }}</span>
-        </div>
-        <div class="profile-field">
-          <span class="profile-field__label">Phone</span>
-          <span class="profile-field__value">{{ profile()?.phone }}</span>
-        </div>
-        <div class="profile-field">
-          <span class="profile-field__label">Role</span>
-          <span class="profile-field__value">{{ profile()?.role }}</span>
-        </div>
-        <div class="profile-field">
-          <span class="profile-field__label">Member Since</span>
-          <span class="profile-field__value">{{ profile()?.createdAt }}</span>
-        </div>
-        <div class="profile-field">
-          <span class="profile-field__label">Last Updated</span>
-          <span class="profile-field__value">{{ profile()?.updatedAt }}</span>
-        </div>
-        @if (profile()?.role === 'mechanic' && profile()?.repairShop) {
-          <div class="profile-field">
-            <span class="profile-field__label">Shop</span>
-            <span class="profile-field__value">{{ profile()?.repairShop?.shopName }}</span>
-          </div>
-          <div class="profile-field">
-            <span class="profile-field__label">Shop Status</span>
-            <span class="profile-field__value">{{ profile()?.repairShop?.status }}</span>
-          </div>
-        }
-      </div>
-      <div card-footer>
-        <app-button variant="outline" (click)="enterEditMode()">Edit Profile</app-button>
-        <app-button variant="outline" (click)="enterChangePasswordMode()">Change Password</app-button>
-      </div>
-    </app-card>
-
-    <div class="danger-zone">
-      <h3 class="danger-zone__title">Danger Zone</h3>
-      <p class="danger-zone__description">
-        Deactivating your account will permanently disable your access.
-        You will need to contact support to reactivate your account.
-      </p>
-      <div class="danger-zone__field">
-        <label for="deactivation-confirmation" class="danger-zone__label">
-          Type DEACTIVATE to confirm
-          <span class="danger-zone__required" aria-hidden="true">*</span>
-        </label>
-        <input
-          id="deactivation-confirmation"
-          type="text"
-          placeholder="DEACTIVATE"
-          class="danger-zone__input"
-          [formControl]="deactivationControl"
-        />
-      </div>
-
-      @if (serverError()) {
-        <div class="profile-form__error" role="alert">{{ serverError() }}</div>
-      }
-
-      <div class="danger-zone__actions">
-        <app-button
-          type="button"
-          variant="secondary"
-          [disabled]="!hasDeactivationInput || isDeactivating()"
-          (click)="cancelDeactivation()"
-        >
-          Cancel
-        </app-button>
-        <app-button
-          type="button"
-          variant="danger"
-          [disabled]="!canDeactivate || isDeactivating()"
-          [loading]="isDeactivating()"
-          (click)="onDeactivate()"
-        >
-          Deactivate Account
-        </app-button>
       </div>
     </div>
-  } @else if (!serverError() && profile() && isEditing()) {
-    <app-card title="Edit Profile" subtitle="Update your profile information">
-      <form [formGroup]="form" (ngSubmit)="onSave()" autocomplete="off" novalidate>
-        <div class="profile-form__field">
-          <app-input
-            formControlName="name"
-            id="profile-edit-name"
-            label="Name"
-            type="text"
-            placeholder="Enter your name"
-            [required]="true"
-            autocomplete="name"
-            [error]="nameError"
-          />
-        </div>
-
-        <div class="profile-form__field">
-          <app-input
-            formControlName="phone"
-            id="profile-edit-phone"
-            label="Phone"
-            type="tel"
-            placeholder="+919876543210"
-            [required]="true"
-            autocomplete="tel"
-            [error]="phoneError"
-          />
-        </div>
-
-        @if (serverError()) {
-          <div class="profile-form__error" role="alert">{{ serverError() }}</div>
-        }
-
-        <div class="profile-form__actions">
-          <app-button
-            type="button"
-            variant="secondary"
-            [disabled]="isSubmitting()"
-            (click)="cancelEdit()"
-          >
-            Cancel
-          </app-button>
-          <app-button
-            type="submit"
-            [disabled]="form.invalid || isSubmitting()"
-            [loading]="isSubmitting()"
-          >
-            Save
-          </app-button>
-        </div>
-      </form>
-    </app-card>
-  } @else if (profile() && isChangingPassword()) {
-    <app-card title="Change Password" subtitle="Enter your current and new password">
-      <form [formGroup]="passwordForm" (ngSubmit)="onChangePassword()" autocomplete="new-password" novalidate>
-        <div class="profile-form__field">
-          <app-input
-            formControlName="currentPassword"
-            id="profile-current-password"
-            label="Current Password"
-            type="password"
-            placeholder="Enter your current password"
-            [required]="true"
-            autocomplete="current-password"
-            [error]="currentPasswordError"
-          />
-        </div>
-
-        <div class="profile-form__field">
-          <app-input
-            formControlName="newPassword"
-            id="profile-new-password"
-            label="New Password"
-            type="password"
-            placeholder="At least 6 characters"
-            [required]="true"
-            autocomplete="new-password"
-            [error]="newPasswordError"
-          />
-        </div>
-
-        <div class="profile-form__field">
-          <app-input
-            formControlName="confirmPassword"
-            id="profile-confirm-password"
-            label="Confirm New Password"
-            type="password"
-            placeholder="Confirm your new password"
-            [required]="true"
-            autocomplete="new-password"
-            [error]="confirmPasswordError"
-          />
-        </div>
-
-        @if (serverError()) {
-          <div class="profile-form__error" role="alert">{{ serverError() }}</div>
-        }
-
-        <div class="profile-form__actions">
-          <app-button
-            type="button"
-            variant="secondary"
-            [disabled]="isSubmitting()"
-            (click)="exitChangePasswordMode()"
-          >
-            Cancel
-          </app-button>
-          <app-button
-            type="submit"
-            [disabled]="passwordForm.invalid || isSubmitting()"
-            [loading]="isSubmitting()"
-          >
-            Change Password
-          </app-button>
-        </div>
-      </form>
-    </app-card>
-  } @else if (!profile() && !serverError()) {
-    <app-card title="Profile" subtitle="Manage your profile information">
-      <div class="profile-placeholder">
-        <p>No profile data available.</p>
-      </div>
-    </app-card>
   }
+
+  <!-- ══════════════════════════════════════════
+       VIEW MODE (default)
+       ══════════════════════════════════════════ -->
+  @else if (!serverError() && profile() && !isEditing() && !isChangingPassword()) {
+
+    <!-- ── WELCOME HERO ─────────────────────── -->
+    <section class="welcome" aria-label="Welcome">
+      <div class="welcome-copy">
+        <div class="eyebrow"><span class="eyebrow-line" aria-hidden="true"></span>MOTOCARE OVERVIEW</div>
+         <h1>Good day,<br><em>{{ (profile()?.name?.split(' ')?.[0] ?? profile()?.name) }}.</em></h1>
+        <p>Everything you need to manage your vehicle care, in one place.</p>
+        <div class="welcome-actions">
+          <a class="btn btn-primary" [routerLink]="'/service-requests'">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            New service request
+          </a>
+          <a class="btn btn-ghost" [routerLink]="'/service-requests'">
+            View history
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="9 18 15 12 9 6"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+      <!-- Decorative rings -->
+      <div class="welcome-art" aria-hidden="true">
+        <div class="ring r1"></div>
+        <div class="ring r2"></div>
+      </div>
+    </section>
+
+    <!-- ── STAT CARDS ──────────────────────── -->
+    <section class="stats" aria-label="Account statistics">
+
+      <article class="stat">
+        <div class="stat-head">
+          <span class="stat-icon indigo" aria-hidden="true">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+            </svg>
+          </span>
+          <small>Account</small>
+        </div>
+        <label>Account type</label>
+        <strong>{{ profile()?.role | titlecase }}</strong>
+        <p>MotoCare member</p>
+      </article>
+
+      <article class="stat">
+        <div class="stat-head">
+          <span class="stat-icon green" aria-hidden="true">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+          </span>
+          <small>Profile</small>
+        </div>
+        <label>Member since</label>
+        <strong>{{ profile()?.createdAt | date:'MMM yyyy' }}</strong>
+        <p>Welcome to MotoCare</p>
+      </article>
+
+      <article class="stat">
+        <div class="stat-head">
+          <span class="stat-icon amber" aria-hidden="true">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+            </svg>
+          </span>
+          <small>Profile</small>
+        </div>
+        <label>Last updated</label>
+        <strong>{{ profile()?.updatedAt | date:'d MMM' }}</strong>
+        <p>Profile information</p>
+      </article>
+
+      <article class="stat">
+        <div class="stat-head">
+          <span class="stat-icon blue" aria-hidden="true">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+            </svg>
+          </span>
+          <small>Status</small>
+        </div>
+        <label>
+          @if (profile()?.role === 'mechanic' && profile()?.repairShop) {
+            Repair shop
+          } @else {
+            Notifications
+          }
+        </label>
+        <strong>
+          @if (profile()?.role === 'mechanic' && profile()?.repairShop) {
+            {{ profile()?.repairShop?.status | titlecase }}
+          } @else {
+            Active
+          }
+        </strong>
+        <p>
+          @if (profile()?.role === 'mechanic' && profile()?.repairShop) {
+            {{ profile()?.repairShop?.shopName }}
+          } @else {
+            Account in good standing
+          }
+        </p>
+      </article>
+
+    </section>
+
+    <!-- ── MAIN GRID ────────────────────────── -->
+    <section class="grid-layout" aria-label="Dashboard panels">
+
+      <!-- LEFT: Profile card -->
+      <article class="panel profile-panel" aria-labelledby="profile-panel-title">
+        <div class="panel-head">
+          <div>
+            <span class="panel-label">PROFILE</span>
+            <h2 id="profile-panel-title">Your account</h2>
+          </div>
+          <button class="link-btn" type="button" (click)="enterEditMode()">Edit profile →</button>
+        </div>
+
+        <div class="identity">
+          <span class="avatar large" aria-hidden="true">
+            {{ profile()?.name?.charAt(0)?.toUpperCase() ?? '?' }}
+          </span>
+          <div class="identity-text">
+            <h3>{{ profile()?.name }}</h3>
+            <p>{{ profile()?.role | titlecase }} account</p>
+            <span class="role-badge">{{ profile()?.role?.toUpperCase() }}</span>
+          </div>
+        </div>
+
+        <div class="info-grid">
+          <div>
+            <span>Email address</span>
+            <strong>{{ profile()?.email }}</strong>
+          </div>
+          <div>
+            <span>Phone number</span>
+            <strong>{{ profile()?.phone }}</strong>
+          </div>
+          <div>
+            <span>Member since</span>
+            <strong>{{ profile()?.createdAt | date:'MMMM yyyy' }}</strong>
+          </div>
+          <div>
+            <span>Last updated</span>
+            <strong>{{ profile()?.updatedAt | date:'d MMMM yyyy' }}</strong>
+          </div>
+        </div>
+
+        <!-- Mechanic: shop info -->
+        @if (profile()?.role === 'mechanic' && profile()?.repairShop) {
+          <div class="shop-row">
+            <div class="shop-row__left">
+              <span class="panel-label">REPAIR SHOP</span>
+              <strong class="shop-row__name">{{ profile()?.repairShop?.shopName }}</strong>
+            </div>
+            <span class="status-badge"
+                  [class.status-badge--verified]="profile()?.repairShop?.status === 'verified'"
+                  [class.status-badge--pending]="profile()?.repairShop?.status === 'pending'">
+              {{ profile()?.repairShop?.status | titlecase }}
+            </span>
+          </div>
+        }
+      </article>
+
+      <!-- RIGHT column -->
+      <div class="right-col">
+
+        <!-- Quick Actions panel -->
+        <article class="panel quick-panel" aria-labelledby="quick-panel-title">
+          <div class="panel-head compact">
+            <div>
+              <span class="panel-label">QUICK ACTIONS</span>
+              <h2 id="quick-panel-title">What do you need?</h2>
+            </div>
+          </div>
+
+          <a class="action-row" [routerLink]="'/service-requests'">
+            <span class="action-icon indigo" aria-hidden="true">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+              </svg>
+            </span>
+            <span class="action-text">
+              <strong>Request a service</strong>
+              <small>Find a mechanic for your vehicle</small>
+            </span>
+            <span class="action-arrow" aria-hidden="true">→</span>
+          </a>
+
+          @if (!isAdmin()) {
+            <a class="action-row" [routerLink]="isMechanic() ? '/repair-shop' : '/service-requests'">
+              <span class="action-icon amber" aria-hidden="true">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+                </svg>
+              </span>
+              <span class="action-text">
+                <strong>{{ isMechanic() ? 'Manage my shop' : 'Find a repair shop' }}</strong>
+                <small>{{ isMechanic() ? 'Update shop details & services' : 'Explore trusted shops nearby' }}</small>
+              </span>
+              <span class="action-arrow" aria-hidden="true">→</span>
+            </a>
+          }
+
+          <a class="action-row" [routerLink]="isAdmin() ? '/admin/service-requests' : '/service-requests'">
+            <span class="action-icon blue" aria-hidden="true">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+              </svg>
+            </span>
+            <span class="action-text">
+              <strong>View service history</strong>
+              <small>See previous requests &amp; status</small>
+            </span>
+            <span class="action-arrow" aria-hidden="true">→</span>
+          </a>
+        </article>
+
+        <!-- Security panel -->
+        <article class="panel security-panel" aria-labelledby="security-panel-title">
+          <span class="security-icon" aria-hidden="true">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+          </span>
+          <div class="security-text">
+            <span class="panel-label">SECURITY</span>
+            <h2 id="security-panel-title">Account protected</h2>
+            <p>Your account access is secure.</p>
+          </div>
+          <button class="manage-btn" type="button" (click)="enterChangePasswordMode()">Manage</button>
+        </article>
+
+        <!-- Danger zone -->
+        <article class="panel danger-panel" aria-labelledby="danger-panel-title">
+          <div class="danger-panel__head">
+            <div>
+              <span class="panel-label panel-label--danger">DANGER ZONE</span>
+              <h2 id="danger-panel-title">Deactivate account</h2>
+            </div>
+          </div>
+          <div class="danger-panel__body">
+            <p>Permanently disable your account access. Contact support to reactivate.</p>
+            <div class="danger-field">
+              <label for="deactivation-confirmation" class="danger-label">
+                Type <strong>DEACTIVATE</strong> to confirm
+                <span aria-hidden="true">*</span>
+              </label>
+              <input
+                id="deactivation-confirmation"
+                type="text"
+                class="danger-input"
+                placeholder="DEACTIVATE"
+                autocomplete="off"
+                [formControl]="deactivationControl"
+              />
+            </div>
+            @if (serverError()) {
+              <p class="dash-form-error" role="alert">{{ serverError() }}</p>
+            }
+            <div class="danger-actions">
+              <app-button type="button" variant="secondary"
+                          [disabled]="!hasDeactivationInput || isDeactivating()"
+                          (click)="cancelDeactivation()">Cancel</app-button>
+              <app-button type="button" variant="danger"
+                          [disabled]="!canDeactivate || isDeactivating()"
+                          [loading]="isDeactivating()"
+                          (click)="onDeactivate()">Deactivate Account</app-button>
+            </div>
+          </div>
+        </article>
+
+      </div>
+    </section>
+  }
+
+  <!-- ══════════════════════════════════════════
+       EDIT PROFILE
+       ══════════════════════════════════════════ -->
+  @else if (!serverError() && profile() && isEditing()) {
+    <div class="form-page">
+      <div class="form-page__header">
+        <span class="panel-label">PROFILE</span>
+        <h1>Edit your information</h1>
+      </div>
+      <div class="form-card">
+        <form [formGroup]="form" (ngSubmit)="onSave()" autocomplete="off" novalidate>
+          <div class="form-field">
+            <app-input formControlName="name" id="profile-edit-name" label="Full name" type="text"
+                       placeholder="Enter your name" [required]="true" autocomplete="name" [error]="nameError"/>
+          </div>
+          <div class="form-field">
+            <app-input formControlName="phone" id="profile-edit-phone" label="Phone number" type="tel"
+                       placeholder="+919876543210" [required]="true" autocomplete="tel" [error]="phoneError"/>
+          </div>
+          @if (serverError()) {
+            <p class="dash-form-error" role="alert">{{ serverError() }}</p>
+          }
+          <div class="form-actions">
+            <app-button type="button" variant="secondary" [disabled]="isSubmitting()" (click)="cancelEdit()">
+              Cancel
+            </app-button>
+            <app-button type="submit" [disabled]="form.invalid || isSubmitting()" [loading]="isSubmitting()">
+              Save Changes
+            </app-button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+
+  <!-- ══════════════════════════════════════════
+       CHANGE PASSWORD
+       ══════════════════════════════════════════ -->
+  @else if (profile() && isChangingPassword()) {
+    <div class="form-page">
+      <div class="form-page__header">
+        <span class="panel-label">SECURITY</span>
+        <h1>Change password</h1>
+      </div>
+      <div class="form-card">
+        <form [formGroup]="passwordForm" (ngSubmit)="onChangePassword()" autocomplete="new-password" novalidate>
+          <div class="form-field">
+            <app-input formControlName="currentPassword" id="profile-current-password"
+                       label="Current password" type="password" placeholder="Enter current password"
+                       [required]="true" autocomplete="current-password" [error]="currentPasswordError"/>
+          </div>
+          <div class="form-field">
+            <app-input formControlName="newPassword" id="profile-new-password"
+                       label="New password" type="password" placeholder="At least 6 characters"
+                       [required]="true" autocomplete="new-password" [error]="newPasswordError"/>
+          </div>
+          <div class="form-field">
+            <app-input formControlName="confirmPassword" id="profile-confirm-password"
+                       label="Confirm new password" type="password" placeholder="Repeat your password"
+                       [required]="true" autocomplete="new-password" [error]="confirmPasswordError"/>
+          </div>
+          @if (serverError()) {
+            <p class="dash-form-error" role="alert">{{ serverError() }}</p>
+          }
+          <div class="form-actions">
+            <app-button type="button" variant="secondary" [disabled]="isSubmitting()" (click)="exitChangePasswordMode()">
+              Cancel
+            </app-button>
+            <app-button type="submit" [disabled]="passwordForm.invalid || isSubmitting()" [loading]="isSubmitting()">
+              Change Password
+            </app-button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+
+  <!-- ══════════════════════════════════════════
+       NO PROFILE
+       ══════════════════════════════════════════ -->
+  @else if (!profile() && !serverError()) {
+    <div class="empty-state" role="status">
+      <p>No profile data available.</p>
+    </div>
+  }
+
 </div>

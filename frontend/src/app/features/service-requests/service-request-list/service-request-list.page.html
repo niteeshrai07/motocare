@@ -1,77 +1,159 @@
-<div class="sr-list-page">
+<div class="srl">
+
+  <!-- ══════════════════════════════════════════
+       PAGE HEADER
+       ══════════════════════════════════════════ -->
+  <div class="srl__header">
+    <div class="srl__header-text">
+      <h1 class="srl__title">Service Requests</h1>
+      <p class="srl__subtitle">Manage and track your vehicle service requests.</p>
+    </div>
+    @if (isCustomer()) {
+      <a class="srl__cta" routerLink="/service-requests/new">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        New Service Request
+      </a>
+    }
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       ERROR STATE
+       ══════════════════════════════════════════ -->
   @if (serverError()) {
-    <div class="sr-error" role="alert">
-      {{ serverError() }}
+    <div class="srl__error" role="alert">
+      <span class="srl__error-icon" aria-hidden="true">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+      </span>
+      <div>
+        <strong>Something went wrong</strong>
+        <p>{{ serverError() }}</p>
+      </div>
     </div>
   }
 
-  <app-card title="Service Requests" subtitle="View and manage your service requests">
-    <div class="sr-toolbar">
-      <div class="sr-filters">
-        @for (filter of statusFilters; track filter) {
-          <button
-            type="button"
-            class="sr-filter-btn"
-            [class.sr-filter-btn--active]="activeFilter() === filter"
-            (click)="setFilter(filter)"
-          >
-            {{ filter === 'all' ? 'All' : formatStatus(filter) }}
-          </button>
-        }
-      </div>
-
-      @if (isCustomer()) {
-        <app-button
+  <!-- ══════════════════════════════════════════
+       FILTER BAR
+       ══════════════════════════════════════════ -->
+  <div class="srl__filters-wrap" role="group" aria-label="Filter service requests by status">
+    <div class="srl__filters">
+      @for (filter of statusFilters; track filter) {
+        <button
           type="button"
-          variant="primary"
-          routerLink="/service-requests/new"
+          class="srl__filter-btn"
+          [class.srl__filter-btn--active]="activeFilter() === filter"
+          (click)="setFilter(filter)"
+          [attr.aria-pressed]="activeFilter() === filter"
         >
-          New Service Request
-        </app-button>
+          {{ filter === 'all' ? 'All' : formatStatus(filter) }}
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       LOADING STATE
+       ══════════════════════════════════════════ -->
+  @if (isLoading()) {
+    <div class="srl__skeletons" aria-label="Loading service requests...">
+      @for (_ of [1,2,3,4,5,6]; track $index) {
+        <div class="srl__skeleton-card">
+          <div class="srl__sk srl__sk--top"></div>
+          <div class="srl__sk srl__sk--line"></div>
+          <div class="srl__sk srl__sk--line srl__sk--short"></div>
+          <div class="srl__sk srl__sk--footer"></div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- ══════════════════════════════════════════
+       EMPTY STATE
+       ══════════════════════════════════════════ -->
+  @else if (!isLoading() && requests().length === 0) {
+    <div class="srl__empty">
+      <div class="srl__empty-icon" aria-hidden="true">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="16" y1="13" x2="8" y2="13"/>
+          <line x1="16" y1="17" x2="8" y2="17"/>
+          <polyline points="10 9 9 9 8 9"/>
+        </svg>
+      </div>
+      @if (activeFilter() !== 'all') {
+        <h2>No {{ formatStatus($any(activeFilter())) }} requests</h2>
+        <p>No service requests match this filter. Try a different status or view all requests.</p>
+        <button class="srl__empty-action srl__empty-action--ghost" type="button" (click)="setFilter('all')">
+          View all requests
+        </button>
+      } @else if (isCustomer()) {
+        <h2>No service requests yet</h2>
+        <p>Your service requests will appear here once you create one.</p>
+        <a class="srl__empty-action" routerLink="/service-requests/new">Create your first request</a>
+      } @else {
+        <h2>No requests assigned</h2>
+        <p>No service requests are currently assigned to your shop.</p>
+      }
+    </div>
+  }
+
+  <!-- ══════════════════════════════════════════
+       REQUEST LIST
+       ══════════════════════════════════════════ -->
+  @else {
+    <div class="srl__grid">
+      @for (request of requests(); track request.id) {
+        <app-service-request-card
+          [request]="request"
+          (selected)="onRequestClick($event)"
+        />
       }
     </div>
 
-    @if (isLoading()) {
-      <div class="sr-loading">
-        <p>Loading service requests...</p>
-      </div>
-    } @else if (!isLoading() && requests().length === 0) {
-      <div class="sr-empty">
-        <p>You don't have any service requests yet.</p>
-      </div>
-    } @else {
-      <div class="sr-grid">
-        @for (request of requests(); track request.id) {
-          <app-service-request-card
-            [request]="request"
-            (selected)="onRequestClick($event)"
-          />
-        }
-      </div>
+    <!-- ── PAGINATION ── -->
+    @if (totalPages() > 1) {
+      <div class="srl__pagination" role="navigation" aria-label="Pagination">
+        <button
+          type="button"
+          class="srl__page-btn"
+          [disabled]="page() <= 1 || isLoading()"
+          (click)="prevPage()"
+          aria-label="Previous page"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polyline points="15 18 9 12 15 6"/>
+          </svg>
+          Previous
+        </button>
 
-      @if (totalPages() > 1) {
-        <div class="sr-pagination">
-          <app-button
-            type="button"
-            variant="outline"
-            [disabled]="page() <= 1 || isLoading()"
-            (click)="prevPage()"
-          >
-            Previous
-          </app-button>
-          <span class="sr-page-info">
-            Page {{ page() }} of {{ totalPages() }}
-          </span>
-          <app-button
-            type="button"
-            variant="outline"
-            [disabled]="page() >= totalPages() || isLoading()"
-            (click)="nextPage()"
-          >
-            Next
-          </app-button>
-        </div>
-      }
+        <span class="srl__page-info">
+          Page <strong>{{ page() }}</strong> of <strong>{{ totalPages() }}</strong>
+        </span>
+
+        <button
+          type="button"
+          class="srl__page-btn"
+          [disabled]="page() >= totalPages() || isLoading()"
+          (click)="nextPage()"
+          aria-label="Next page"
+        >
+          Next
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polyline points="9 18 15 12 9 6"/>
+          </svg>
+        </button>
+      </div>
     }
-  </app-card>
+  }
+
 </div>

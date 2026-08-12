@@ -36,7 +36,6 @@ type ActionType = 'quote' | 'reject' | 'accept' | 'cancel' | 'start' | 'complete
   standalone: true,
   imports: [
     ReactiveFormsModule,
-    CardComponent,
     ButtonComponent,
     RequestStatusBadgeComponent,
     CurrencyPipe,

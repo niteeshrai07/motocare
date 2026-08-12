@@ -1,186 +1,340 @@
-<div class="sr-create-page">
+<div class="src">
+
+  <!-- ══════════════════════════════════════════
+       PAGE HEADER
+       ══════════════════════════════════════════ -->
+  <div class="src__header">
+    <div class="src__header-inner">
+      <button type="button" class="src__back" (click)="goBack()" aria-label="Back to service requests">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <polyline points="15 18 9 12 15 6"/>
+        </svg>
+        Back
+      </button>
+      <div>
+        <h1 class="src__title">Create Service Request</h1>
+        <p class="src__subtitle">Tell us what your vehicle needs and we'll help connect you with the right mechanic.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       SERVER ERROR
+       ══════════════════════════════════════════ -->
   @if (serverError()) {
-    <div class="sr-error" role="alert">
-      {{ serverError() }}
+    <div class="src__error" role="alert">
+      <span class="src__error-icon" aria-hidden="true">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+      </span>
+      <div>
+        <strong>Submission failed</strong>
+        <p>{{ serverError() }}</p>
+      </div>
     </div>
   }
 
-  <form [formGroup]="form" (ngSubmit)="onSubmit()" autocomplete="off" novalidate>
-    <app-card title="Create Service Request" subtitle="Find a repair shop and describe your issue">
-      <div class="sr-create-field">
-        <label class="sr-create-label">Vehicle Type</label>
-        <div class="sr-vehicle-selector">
-          @for (vt of vehicleTypes; track vt.value) {
-            <label class="sr-vehicle-option">
-              <input
-                type="radio"
-                name="vehicleType"
-                [value]="vt.value"
-                formControlName="vehicleType"
-                class="sr-vehicle-input"
-              />
-              <span class="sr-vehicle-label">
-                <span class="sr-vehicle-icon">{{ vt.icon }}</span>
-                {{ vt.label }}
-              </span>
+  <!-- ══════════════════════════════════════════
+       FORM
+       ══════════════════════════════════════════ -->
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" autocomplete="off" novalidate class="src__form">
+
+    <!-- ── Two-column grid ── -->
+    <div class="src__grid">
+
+      <!-- ════════════════════════════════════
+           LEFT COLUMN
+           ════════════════════════════════════ -->
+      <div class="src__left">
+
+        <!-- ── SECTION 1: Vehicle ── -->
+        <section class="src__section" aria-labelledby="section-vehicle">
+          <div class="src__section-head">
+            <span class="src__step" aria-hidden="true">1</span>
+            <div>
+              <h2 class="src__section-title" id="section-vehicle">Vehicle</h2>
+              <p class="src__section-desc">Select the vehicle that needs service.</p>
+            </div>
+          </div>
+
+          <div class="src__field">
+            <label class="src__label" id="vehicle-type-label">Vehicle Type <span aria-hidden="true" class="src__req">*</span></label>
+            <div class="src__vehicle-grid" role="radiogroup" aria-labelledby="vehicle-type-label">
+              @for (vt of vehicleTypes; track vt.value) {
+                <label class="src__vehicle-card" [class.src__vehicle-card--selected]="form.get('vehicleType')?.value === vt.value">
+                  <input
+                    type="radio"
+                    name="vehicleType"
+                    [value]="vt.value"
+                    formControlName="vehicleType"
+                    class="src__vehicle-radio"
+                  />
+                  <span class="src__vehicle-icon" aria-hidden="true">{{ vt.icon }}</span>
+                  <span class="src__vehicle-name">{{ vt.label }}</span>
+                  <span class="src__vehicle-check" aria-hidden="true">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                  </span>
+                </label>
+              }
+            </div>
+            @if (form.get('vehicleType')?.hasError('required') && form.get('vehicleType')?.touched) {
+              <span class="src__err" role="alert">Vehicle type is required</span>
+            }
+          </div>
+        </section>
+
+        <!-- ── SECTION 2: Issue Description ── -->
+        <section class="src__section" aria-labelledby="section-issue">
+          <div class="src__section-head">
+            <span class="src__step" aria-hidden="true">2</span>
+            <div>
+              <h2 class="src__section-title" id="section-issue">Issue Description</h2>
+              <p class="src__section-desc">Describe the issue so the mechanic understands the problem before accepting.</p>
+            </div>
+          </div>
+
+          <div class="src__field">
+            <label class="src__label" for="issue-description">
+              What's wrong with your vehicle? <span aria-hidden="true" class="src__req">*</span>
             </label>
-          }
-        </div>
-        @if (form.get('vehicleType')?.hasError('required') && form.get('vehicleType')?.touched) {
-          <span class="sr-form-error" role="alert">Vehicle type is required</span>
-        }
-      </div>
+            <textarea
+              id="issue-description"
+              formControlName="issueDescription"
+              class="src__textarea"
+              placeholder="e.g. Engine makes a knocking noise when accelerating, especially uphill..."
+              rows="5"
+              [class.src__textarea--error]="form.get('issueDescription')?.invalid && form.get('issueDescription')?.touched"
+            ></textarea>
+            @if (form.get('issueDescription')?.hasError('required') && form.get('issueDescription')?.touched) {
+              <span class="src__err" role="alert">Issue description is required</span>
+            }
+            @if (form.get('issueDescription')?.hasError('minlength') && form.get('issueDescription')?.touched) {
+              <span class="src__err" role="alert">Issue description must be at least 5 characters</span>
+            }
+            @if (form.get('issueDescription')?.hasError('maxlength') && form.get('issueDescription')?.touched) {
+              <span class="src__err" role="alert">Issue description must be under 500 characters</span>
+            }
+          </div>
+        </section>
 
-      <div class="sr-create-field">
-        <label class="sr-create-label">Issue Description</label>
-        <textarea
-          formControlName="issueDescription"
-          class="sr-textarea"
-          placeholder="Describe your issue (minimum 5 characters)"
-          rows="4"
-          [class.sr-textarea--error]="form.get('issueDescription')?.invalid && form.get('issueDescription')?.touched"
-        ></textarea>
-        @if (form.get('issueDescription')?.hasError('required') && form.get('issueDescription')?.touched) {
-          <span class="sr-form-error" role="alert">Issue description is required</span>
-        }
-        @if (form.get('issueDescription')?.hasError('minlength') && form.get('issueDescription')?.touched) {
-          <span class="sr-form-error" role="alert">Issue description must be at least 5 characters</span>
-        }
-        @if (form.get('issueDescription')?.hasError('maxlength') && form.get('issueDescription')?.touched) {
-          <span class="sr-form-error" role="alert">Issue description must be under 500 characters</span>
-        }
-      </div>
+        <!-- ── SECTION 3: Location ── -->
+        <section class="src__section" aria-labelledby="section-location">
+          <div class="src__section-head">
+            <span class="src__step" aria-hidden="true">3</span>
+            <div>
+              <h2 class="src__section-title" id="section-location">Breakdown Location</h2>
+              <p class="src__section-desc">Where is your vehicle? This helps us find nearby repair shops.</p>
+            </div>
+          </div>
 
-      <div class="sr-create-field">
-        <label class="sr-create-label">Breakdown Location</label>
-        <div class="sr-location">
-          <div class="sr-location__source">
-            <label class="sr-location__option">
+          <!-- Location type toggle (radio) -->
+          <div class="src__loc-toggle" role="radiogroup" aria-label="Location method">
+            <label class="src__loc-mode" [class.src__loc-mode--active]="locationType === 'geolocation'">
               <input
                 type="radio"
                 name="locationType"
                 value="geolocation"
                 formControlName="locationType"
+                class="src__hidden-radio"
               />
-              <span>Use my current location</span>
+              <span class="src__loc-mode-icon" aria-hidden="true">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/>
+                </svg>
+              </span>
+              Use my current location
             </label>
-            <label class="sr-location__option">
+            <label class="src__loc-mode" [class.src__loc-mode--active]="locationType === 'manual'">
               <input
                 type="radio"
                 name="locationType"
                 value="manual"
                 formControlName="locationType"
+                class="src__hidden-radio"
               />
-              <span>Enter manually</span>
+              <span class="src__loc-mode-icon" aria-hidden="true">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+              </span>
+              Enter manually
             </label>
           </div>
 
+          <!-- Geolocation: Get Location button -->
           @if (locationType === 'geolocation' && !coordinates()) {
             <button
               type="button"
-              class="sr-btn sr-btn--outline"
+              class="src__geo-btn"
               [disabled]="isLocating()"
               (click)="useGeolocation()"
             >
               @if (isLocating()) {
-                <span>Locating...</span>
+                <svg class="src__geo-spin" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+                </svg>
+                Locating...
               } @else {
-                <span>Get My Location</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/>
+                </svg>
+                Get My Location
               }
             </button>
           }
 
+          <!-- Location error -->
           @if (locationError()) {
-            <div class="sr-location__error" role="alert">
+            <div class="src__loc-error" role="alert">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/>
+                <line x1="12" y1="16" x2="12.01" y2="16"/>
+              </svg>
               {{ locationError() }}
             </div>
           }
 
+          <!-- Geolocation success: coordinates display -->
           @if (coordinates()) {
-            <div class="sr-location__coords">
-              Latitude: {{ coordinates()!.lat }}, Longitude: {{ coordinates()!.lng }}
+            <div class="src__loc-success">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+              Location captured — Lat {{ coordinates()!.lat | number:'1.4-6' }}, Lng {{ coordinates()!.lng | number:'1.4-6' }}
             </div>
           }
 
+          <!-- Manual location inputs -->
           @if (locationType === 'manual') {
-            <div class="sr-location__inputs">
-              <div class="sr-location__input">
-                <label class="sr-location__sublabel">Latitude</label>
+            <div class="src__loc-inputs">
+              <div class="src__field">
+                <label class="src__sublabel" for="loc-lat">Latitude <span aria-hidden="true" class="src__req">*</span></label>
                 <input
+                  id="loc-lat"
                   type="number"
                   step="0.000001"
                   placeholder="e.g. 28.6139"
                   formControlName="locationLat"
-                  class="sr-input"
-                  [class.sr-input--error]="form.get('locationLat')?.invalid && form.get('locationLat')?.touched"
+                  class="src__input"
+                  [class.src__input--error]="form.get('locationLat')?.invalid && form.get('locationLat')?.touched"
                 />
                 @if (form.get('locationLat')?.hasError('required') && form.get('locationLat')?.touched) {
-                  <span class="sr-form-error" role="alert">Latitude is required</span>
+                  <span class="src__err" role="alert">Latitude is required</span>
                 }
               </div>
-              <div class="sr-location__input">
-                <label class="sr-location__sublabel">Longitude</label>
+              <div class="src__field">
+                <label class="src__sublabel" for="loc-lng">Longitude <span aria-hidden="true" class="src__req">*</span></label>
                 <input
+                  id="loc-lng"
                   type="number"
                   step="0.000001"
                   placeholder="e.g. 77.5946"
                   formControlName="locationLng"
-                  class="sr-input"
-                  [class.sr-input--error]="form.get('locationLng')?.invalid && form.get('locationLng')?.touched"
+                  class="src__input"
+                  [class.src__input--error]="form.get('locationLng')?.invalid && form.get('locationLng')?.touched"
                 />
                 @if (form.get('locationLng')?.hasError('required') && form.get('locationLng')?.touched) {
-                  <span class="sr-form-error" role="alert">Longitude is required</span>
+                  <span class="src__err" role="alert">Longitude is required</span>
                 }
               </div>
             </div>
           }
+        </section>
+
+      </div>
+
+      <!-- ════════════════════════════════════
+           RIGHT COLUMN
+           ════════════════════════════════════ -->
+      <div class="src__right">
+
+        <!-- ── SECTION 4: Repair Shop ── -->
+        <section class="src__section" aria-labelledby="section-shop">
+          <div class="src__section-head">
+            <span class="src__step" aria-hidden="true">4</span>
+            <div>
+              <h2 class="src__section-title" id="section-shop">Repair Shop</h2>
+              <p class="src__section-desc">Choose where you'd like your vehicle serviced.</p>
+            </div>
+          </div>
+
+          @if (form.get('vehicleType')?.value && coordinates() && locationType === 'geolocation') {
+            <app-shop-selector
+              [lng]="coordinates()!.lng"
+              [lat]="coordinates()!.lat"
+              [vehicleType]="form.get('vehicleType')?.value"
+              [selectedShopId]="form.get('shopId')?.value"
+              (shopSelected)="onShopSelected($event)"
+            />
+          } @else if (form.get('vehicleType')?.value && manualLat !== null && manualLng !== null && locationType === 'manual') {
+            <app-shop-selector
+              [lng]="manualLng"
+              [lat]="manualLat"
+              [vehicleType]="form.get('vehicleType')?.value"
+              [selectedShopId]="form.get('shopId')?.value"
+              (shopSelected)="onShopSelected($event)"
+            />
+          } @else {
+            <div class="src__shop-hint">
+              <span class="src__shop-hint-icon" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+                </svg>
+              </span>
+              <p>Select a vehicle type and provide your location to search for nearby repair shops.</p>
+            </div>
+          }
+          @if (form.get('shopId')?.hasError('required') && form.get('shopId')?.touched) {
+            <span class="src__err" role="alert">Please select a repair shop</span>
+          }
+        </section>
+
+        <!-- ── SUBMIT SECTION ── -->
+        <div class="src__submit-card">
+          <div class="src__submit-inner">
+            <div class="src__submit-meta">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M12 6v6l4 2"/>
+              </svg>
+              Your request will be sent to the selected repair shop after submission.
+            </div>
+            <div class="src__submit-actions">
+              <app-button
+                type="button"
+                variant="outline"
+                (click)="goBack()"
+              >
+                Cancel
+              </app-button>
+              <app-button
+                type="submit"
+                [disabled]="form.invalid || isSubmitting"
+                [loading]="isSubmitting"
+              >
+                Submit Service Request
+              </app-button>
+            </div>
+          </div>
         </div>
-      </div>
 
-      <div class="sr-create-field">
-        <label class="sr-create-label">Repair Shop</label>
-        @if (form.get('vehicleType')?.value && coordinates() && locationType === 'geolocation') {
-          <app-shop-selector
-            [lng]="coordinates()!.lng"
-            [lat]="coordinates()!.lat"
-            [vehicleType]="form.get('vehicleType')?.value"
-            [selectedShopId]="form.get('shopId')?.value"
-            (shopSelected)="onShopSelected($event)"
-          />
-        } @else if (form.get('vehicleType')?.value && manualLat !== null && manualLng !== null && locationType === 'manual') {
-          <app-shop-selector
-            [lng]="manualLng"
-            [lat]="manualLat"
-            [vehicleType]="form.get('vehicleType')?.value"
-            [selectedShopId]="form.get('shopId')?.value"
-            (shopSelected)="onShopSelected($event)"
-          />
-        } @else {
-          <p class="sr-create__hint">
-            Select a vehicle type and provide your location to search for repair shops.
-          </p>
-        }
-        @if (form.get('shopId')?.hasError('required') && form.get('shopId')?.touched) {
-          <span class="sr-form-error" role="alert">Please select a repair shop</span>
-        }
       </div>
+    </div>
 
-      <div card-footer>
-        <app-button
-          type="button"
-          variant="outline"
-          (click)="goBack()"
-        >
-          Cancel
-        </app-button>
-        <app-button
-          type="submit"
-          [disabled]="form.invalid || isSubmitting"
-          [loading]="isSubmitting"
-        >
-          Create Request
-        </app-button>
-      </div>
-    </app-card>
   </form>
 </div>

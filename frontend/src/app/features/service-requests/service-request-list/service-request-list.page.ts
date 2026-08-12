@@ -36,7 +36,7 @@ const STATUS_LABELS: Record<ServiceRequestStatus, string> = {
 @Component({
   selector: 'app-service-request-list',
   standalone: true,
-  imports: [CardComponent, ButtonComponent, ServiceRequestCardComponent, RouterLink],
+  imports: [ServiceRequestCardComponent, RouterLink],
   templateUrl: './service-request-list.page.html',
   styleUrl: './service-request-list.page.scss',
 })

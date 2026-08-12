@@ -1,42 +1,614 @@
-.auth-page {
+// ============================================================
+// MotoCare Login — "Vehicle Blueprint" (polished)
+// Technical-drawing left panel with refined contrast,
+// interactive schematic, and a warmer brass-accented form.
+// ============================================================
+
+$blueprint-950: #0a1c30;
+$blueprint-900: #123152;
+$blueprint-800: #1c4374;
+
+$line-white: rgba(255, 255, 255, 0.55);
+$line-soft: rgba(255, 255, 255, 0.13);
+
+$brass: #c99a54;
+$brass-deep: #a87b3a;
+$brass-light: #e0b87a;
+
+$paper: #fbf9f4;
+$paper-line: #e8e2d2;
+
+$ink: #181a1f;
+$ink-muted: #726c5c;
+
+$white: #ffffff;
+
+// ============================================================
+// ROOT
+// ============================================================
+.mc-login {
+  position: relative;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(400px, 0.85fr);
+  overflow: hidden;
+  isolation: isolate;
+  background: linear-gradient(150deg, $blueprint-950 0%, $blueprint-900 60%, #0d2038 100%);
+}
+
+// ============================================================
+// LEFT — BLUEPRINT PANEL
+// ============================================================
+.mc-login__blueprint {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  padding: clamp(32px, 4.5vw, 68px);
+  color: $white;
+  overflow: hidden;
+
+  // fine grid
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient($line-soft 1px, transparent 1px),
+      linear-gradient(90deg, $line-soft 1px, transparent 1px);
+    background-size: 28px 28px;
+    opacity: 0.5;
+  }
+
+  // coarse grid
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+    background-size: 140px 140px;
+  }
+}
+
+// registration marks with subtle pulse
+.mc-login__reg {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  opacity: 0.4;
+  animation: mc-reg-pulse 3s ease-in-out infinite alternate;
+
+  &::before,
+  &::after {
+    content: "";
+    position: absolute;
+    background: $line-white;
+  }
+
+  &::before {
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    transform: translateX(-50%);
+  }
+
+  &::after {
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    transform: translateY(-50%);
+  }
+}
+
+.mc-login__reg--tl {
+  top: 20px;
+  left: 20px;
+}
+.mc-login__reg--br {
+  bottom: 20px;
+  right: 20px;
+}
+
+@keyframes mc-reg-pulse {
+  0% { opacity: 0.3; }
+  100% { opacity: 0.6; }
+}
+
+.mc-login__blueprint-inner {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 660px);
+  min-height: min(720px, 86vh);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+// ---- header ----
+.mc-login__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.mc-login__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 11px;
+  color: inherit;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 20px;
+  letter-spacing: -0.01em;
+}
+
+.mc-login__brand-mark {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.mc-login__brand-mark--light {
+  border-color: rgba(24, 26, 31, 0.14);
+  background: rgba(24, 26, 31, 0.04);
+  color: $ink;
+}
+
+.mc-login__access-tag {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  color: rgba(255, 255, 255, 0.4);
+  white-space: nowrap;
+}
+
+// ---- hero ----
+.mc-login__hero {
+  margin-top: clamp(44px, 6.5vh, 72px);
+}
+
+.mc-login__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.16em;
+  color: $white;
+}
+
+.mc-login__tick {
+  width: 14px;
+  height: 1px;
+  flex-shrink: 0;
+  background: $white;
+}
+
+.mc-login__tick--dark {
+  background: $ink-muted;
+  opacity: 0.5;
+}
+
+.mc-login__headline {
+  margin: 16px 0 0;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: clamp(40px, 4.4vw, 62px);
+  line-height: 1.04;
+  letter-spacing: -0.03em;
+  color: $brass;
+}
+
+.mc-login__lede {
+  max-width: 440px;
+  margin-top: 18px;
+  color: rgba(255, 255, 255, 0.65); // increased contrast
+  font-size: 14.5px;
+  line-height: 1.7;
+}
+
+// ============================================================
+// SCHEMATIC — with interactive hover
+// ============================================================
+.mc-login__schematic {
+  position: relative;
+  margin-top: 38px;
+  flex: 1;
+  min-height: 230px;
+  display: flex;
+  align-items: center;
+
+  svg {
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+
+  // Hover effect: highlight callout groups
+  .mc-login__callout-group {
+    transition: opacity 0.2s ease;
+  }
+
+  &:hover .mc-login__callout-group {
+    opacity: 0.5;
+  }
+
+  .mc-login__callout-group:hover {
+    opacity: 1 !important;
+
+    .mc-login__leader {
+      stroke: $brass;
+      stroke-width: 1.5;
+    }
+
+    .mc-login__callout-label {
+      fill: $white;
+    }
+  }
+}
+
+// schematic styling (unchanged but with these new classes)
+.mc-login__car-line {
+  fill: none;
+  stroke: $line-white;
+  stroke-width: 1.4;
+}
+.mc-login__car-line-soft {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.22);
+  stroke-width: 1;
+  stroke-dasharray: 2 4;
+}
+.mc-login__leader {
+  stroke: rgba(255, 255, 255, 0.3);
+  stroke-width: 1;
+  transition: stroke 0.2s, stroke-width 0.2s;
+}
+.mc-login__leader-dot {
+  fill: $brass;
+}
+.mc-login__callout-label {
+  font-size: 12px;
+  font-weight: 650;
+  fill: rgba(255, 255, 255, 0.88);
+  font-family: var(--font-body, sans-serif);
+  transition: fill 0.2s;
+}
+.mc-login__callout-desc {
+  font-size: 9.5px;
+  fill: rgba(255, 255, 255, 0.55); // improved contrast
+  font-family: var(--font-body, sans-serif);
+}
+.mc-login__callout-index {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  fill: $brass;
+}
+
+// ============================================================
+// RIGHT — FORM PANEL
+// ============================================================
+.mc-login__form-side {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 100vh;
-  background: var(--color-bg);
-  padding: var(--space-4);
+  min-width: 0;
+  padding: clamp(28px, 5vw, 64px);
+  background: radial-gradient(circle at 100% 0%, rgba(201, 154, 84, 0.06), transparent 55%), $paper;
+  border-left: 1px solid rgba(0, 0, 0, 0.06);
 }
 
-.auth-form {
-  &__field {
-    margin-bottom: var(--space-4);
+.mc-login__mobile-brand {
+  display: none;
+}
+
+.mc-login__form-container {
+  width: min(100%, 410px);
+  margin: 0 auto;
+  animation: mc-login-enter 500ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes mc-login-enter {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.mc-login__form-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  color: $ink-muted;
+}
+
+// ---- heading ----
+.mc-login__form-heading h2 {
+  margin: 14px 0 0;
+  color: $ink;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: clamp(32px, 3vw, 38px);
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+}
+.mc-login__form-heading h2 span {
+  color: $brass-deep;
+}
+.mc-login__form-heading p {
+  max-width: 340px;
+  margin-top: 12px;
+  color: #8a8471;
+  font-size: 13.5px;
+  line-height: 1.6;
+}
+
+// ============================================================
+// FORM
+// ============================================================
+.mc-login__form {
+  margin-top: 30px;
+}
+.mc-login__field {
+  margin-bottom: 18px;
+}
+
+.mc-login__form-container {
+
+  ::ng-deep app-input .input-label {
+    margin-bottom: 7px;
+    color: #3f3b32;
+    font-size: 12px;
+    font-weight: 600;
   }
 
-  &__error {
-    margin: var(--space-2) 0;
+  ::ng-deep app-input .input-field {
+    height: 50px;
+    padding: 0 14px;
+    border: 1px solid #ded6bd;
+    border-radius: 8px;
+    background: #fffdf8;
+    color: $ink;
     font-size: 14px;
-    color: var(--color-danger);
-  }
+    transition: border-color 150ms ease, background 150ms ease, box-shadow 150ms ease;
 
-  &__actions {
-    margin-top: var(--space-5);
-    text-align: center;
-  }
-
-  &__footer {
-    margin-top: var(--space-4);
-    text-align: center;
-    font-size: 14px;
-    color: var(--color-text-secondary);
-  }
-
-  &__link {
-    color: var(--color-primary);
-    text-decoration: underline;
-    cursor: pointer;
-
-    &:hover {
-      color: var(--color-primary-light);
+    &::placeholder {
+      color: #b7ae94;
     }
+
+    &:hover:not(:focus):not([disabled]) {
+      border-color: #c9bd98;
+    }
+
+    &:focus {
+      border-color: $brass-deep;
+      background: $white;
+      outline: none;
+      box-shadow: 0 0 0 4px rgba(169, 124, 58, 0.12);
+    }
+  }
+
+  ::ng-deep app-input .input--error {
+    border-color: var(--color-danger);
+    background: #fffafa;
+  }
+
+  ::ng-deep app-input .input-error {
+    margin-top: 5px;
+    font-size: 11.5px;
+  }
+
+  ::ng-deep app-button {
+    display: flex;
+    width: 100%;
+  }
+
+  ::ng-deep app-button .btn--primary {
+    width: 100%;
+    height: 52px;
+    justify-content: center;
+    border: 0;
+    border-radius: 8px;
+    background: linear-gradient(100deg, #1e3a5f, $blueprint-800 60%, #2a5a8a 130%);
+    box-shadow: 0 10px 24px rgba(18, 49, 82, 0.28);
+    font-size: 14px;
+    font-weight: 650;
+    letter-spacing: 0.01em;
+    color: $white;
+    transition: transform 200ms cubic-bezier(0.34, 1.56, 0.64, 1),
+                box-shadow 250ms ease;
+
+    &::after {
+      content: '';
+      display: block;
+      width: 30%;
+      height: 2px;
+      background: $brass;
+      margin: 4px auto 0;
+      border-radius: 2px;
+      opacity: 0.5;
+      transition: opacity 0.2s;
+    }
+
+    &:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 28px rgba(18, 49, 82, 0.34);
+
+      &::after {
+        opacity: 1;
+      }
+    }
+
+    &:active:not(:disabled) {
+      transform: translateY(0) scale(0.98);
+      box-shadow: 0 6px 16px rgba(18, 49, 82, 0.2);
+    }
+  }
+}
+
+// ============================================================
+// ERROR
+// ============================================================
+.mc-login__error {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 4px 0 18px;
+  padding: 11px 13px;
+  border: 1px solid rgba(200, 60, 60, 0.18);
+  border-radius: 11px;
+  background: rgba(200, 60, 60, 0.045);
+  color: #c93636;
+  font-size: 12px;
+  line-height: 1.45;
+}
+.mc-login__error-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(200, 60, 60, 0.1);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+// ============================================================
+// ACTIONS / FOOTER / LEGAL
+// ============================================================
+.mc-login__actions {
+  margin-top: 25px;
+}
+.mc-login__footer {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 24px;
+  color: #8a8471;
+  font-size: 12.5px;
+}
+.mc-login__register-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: $brass-deep;
+  font-weight: 650;
+  text-decoration: none;
+  transition: color 150ms ease, gap 200ms ease;
+  &:hover {
+    color: #7d5c2c;
+    gap: 9px;
+    text-decoration: none;
+  }
+}
+.mc-login__form-bottom {
+  position: absolute;
+  left: clamp(28px, 5vw, 64px);
+  right: clamp(28px, 5vw, 64px);
+  bottom: 22px;
+  display: flex;
+  justify-content: space-between;
+  color: #a49d84;
+  font-size: 10px;
+}
+.mc-login__secure {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  span {
+    color: $brass-deep;
+    font-size: 7px;
+  }
+}
+
+// ============================================================
+// RESPONSIVE
+// ============================================================
+@media (max-width: 1100px) {
+  .mc-login {
+    grid-template-columns: minmax(0, 1fr) minmax(380px, 0.82fr);
+  }
+  .mc-login__blueprint {
+    padding: 44px;
+  }
+  .mc-login__headline {
+    font-size: clamp(36px, 5vw, 52px);
+  }
+}
+
+@media (max-width: 767px) {
+  .mc-login {
+    display: block;
+    min-height: 100dvh;
+    background: linear-gradient(150deg, $blueprint-950 0%, $blueprint-900 100%);
+  }
+  .mc-login__blueprint {
+    display: none;
+  }
+  .mc-login__form-side {
+    min-height: 100dvh;
+    display: flex;
+    padding: 26px max(22px, 5vw) 70px;
+    background: $paper;
+    border-left: 0;
+  }
+  .mc-login__mobile-brand {
+    display: block;
+    margin-bottom: 44px;
+  }
+  .mc-login__form-container {
+    width: 100%;
+    max-width: 480px;
+    margin: auto;
+  }
+  .mc-login__form-bottom {
+    position: static;
+    margin-top: 40px;
+  }
+}
+
+@media (max-width: 420px) {
+  .mc-login__form-side {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+  .mc-login__form-heading h2 {
+    font-size: 32px;
+  }
+  .mc-login__form-heading p {
+    font-size: 13px;
+  }
+  .mc-login__form {
+    margin-top: 28px;
+  }
+  .mc-login__field {
+    margin-bottom: 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mc-login__form-container,
+  .mc-login__register-link,
+  .mc-login__form-container ::ng-deep app-input .input-field,
+  .mc-login__form-container ::ng-deep app-button .btn--primary,
+  .mc-login__reg {
+    animation: none;
+    transition: none;
   }
 }

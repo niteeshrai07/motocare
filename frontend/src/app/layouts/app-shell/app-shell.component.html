@@ -1,99 +1,220 @@
-<header class="topbar">
-  <div class="topbar__left">
-    <button class="topbar__hamburger" aria-label="Toggle navigation">
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <line x1="3" y1="12" x2="21" y2="12"></line>
-        <line x1="3" y1="6" x2="21" y2="6"></line>
-        <line x1="3" y1="18" x2="21" y2="18"></line>
-      </svg>
-    </button>
-    <span class="topbar__logo">MotoCare</span>
-  </div>
-  <div class="topbar__right">
-    <button class="topbar__icon" aria-label="Notifications" (click)="navigateToNotifications()">
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-        <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-      </svg>
-      @if (unreadCount() > 0) {
-        <span class="topbar__badge">{{ unreadCount() > 99 ? '99+' : unreadCount() }}</span>
-      }
-    </button>
-    <button class="topbar__avatar" aria-label="User menu" (click)="onLogout()">
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
-        <circle cx="12" cy="7" r="4"></circle>
-      </svg>
-    </button>
-  </div>
-</header>
+<!-- ══════════════════════════════════════════════
+     APP SHELL — matches approved mockup
+     ══════════════════════════════════════════════ -->
 
-<aside class="sidebar">
-  <nav class="sidebar__nav">
-    <a [routerLink]="isAdmin() ? '/admin/dashboard' : '/profile'" routerLinkActive="sidebar__item--active" class="sidebar__item">
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <rect x="3" y="3" width="7" height="7"></rect>
-        <rect x="14" y="3" width="7" height="7"></rect>
-        <rect x="14" y="14" width="7" height="7"></rect>
-        <rect x="3" y="14" width="7" height="7"></rect>
-      </svg>
-      <span>Dashboard</span>
+<!-- ── Mobile overlay ── -->
+@if (sidebarOpen()) {
+  <div class="sidebar-overlay" (click)="closeSidebar()" aria-hidden="true"></div>
+}
+
+<!-- ═══════════════════════════════════════════
+     SIDEBAR
+     ═══════════════════════════════════════════ -->
+<aside class="sidebar" [class.sidebar--open]="sidebarOpen()" aria-label="Main navigation">
+
+  <!-- Brand -->
+  <div>
+    <a class="brand" [routerLink]="isAdmin() ? '/admin/dashboard' : '/profile'" (click)="closeSidebar()">
+      <span class="brand-mark" aria-hidden="true">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"
+                fill="currentColor"/>
+        </svg>
+      </span>
+      <span>MotoCare</span>
     </a>
-     @if (isMechanic()) {
-       <a routerLink="/repair-shop" routerLinkActive="sidebar__item--active" class="sidebar__item">
-         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-           <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
-         </svg>
-         <span>Repair Shop</span>
-       </a>
-     }
-    <a [routerLink]="isAdmin() ? '/admin/service-requests' : '/service-requests'" routerLinkActive="sidebar__item--active" class="sidebar__item">
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-        <polyline points="14 2 14 8 20 8"></polyline>
-      </svg>
-      <span>Service Requests</span>
+
+    <nav aria-label="Workspace navigation">
+      <!-- WORKSPACE section -->
+      <div class="nav-label">Workspace</div>
+
+      <a class="nav-item"
+         [routerLink]="isAdmin() ? '/admin/dashboard' : '/profile'"
+         routerLinkActive="active"
+         (click)="closeSidebar()">
+        <span aria-hidden="true">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+            <rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/>
+          </svg>
+        </span>
+        Overview
+      </a>
+
+      <a class="nav-item"
+         [routerLink]="isAdmin() ? '/admin/service-requests' : '/service-requests'"
+         routerLinkActive="active"
+         (click)="closeSidebar()">
+        <span aria-hidden="true">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+          </svg>
+        </span>
+        Service Requests
+      </a>
+
+      <a class="nav-item"
+         routerLink="/notifications"
+         routerLinkActive="active"
+         (click)="closeSidebar()">
+        <span aria-hidden="true">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+          </svg>
+        </span>
+        Notifications
+        @if (unreadCount() > 0) {
+          <i class="nav-badge-dot" aria-label="{{ unreadCount() }} unread"></i>
+        }
+      </a>
+
+      <!-- SERVICES / MANAGEMENT section -->
+      <div class="nav-label spaced">Services</div>
+
+      @if (isMechanic()) {
+        <a class="nav-item" routerLink="/repair-shop" routerLinkActive="active" (click)="closeSidebar()">
+          <span aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+            </svg>
+          </span>
+          Repair Shop
+        </a>
+      }
+
+      @if (isAdmin()) {
+        <a class="nav-item" routerLink="/admin/repair-shops" routerLinkActive="active" (click)="closeSidebar()">
+          <span aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+            </svg>
+          </span>
+          Repair Shops
+        </a>
+        <a class="nav-item" routerLink="/admin/users" routerLinkActive="active" (click)="closeSidebar()">
+          <span aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+              <circle cx="12" cy="7" r="4"/>
+            </svg>
+          </span>
+          Users
+        </a>
+      }
+
+      @if (isAdmin()) {
+        <a class="nav-item" routerLink="/admin/reviews" routerLinkActive="active" (click)="closeSidebar()">
+          <span aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+            </svg>
+          </span>
+          Reviews
+        </a>
+      } @else {
+        <a class="nav-item nav-item--disabled" href="#" aria-label="Reviews — coming soon">
+          <span aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+            </svg>
+          </span>
+          Reviews
+          <em class="nav-soon">Soon</em>
+        </a>
+      }
+    </nav>
+  </div>
+
+  <!-- Sidebar bottom: user + sign out -->
+  <div class="sidebar-bottom">
+    <a class="user-mini" routerLink="/profile" (click)="closeSidebar()">
+      <span class="avatar small" aria-hidden="true">{{ userInitial() }}</span>
+      <span class="user-mini-info">
+        <strong>{{ userName() }}</strong>
+        <small>{{ userRole() | titlecase }} account</small>
+      </span>
+      <em aria-hidden="true">›</em>
     </a>
-    @if (isAdmin()) {
-      <a routerLink="/admin/reviews" routerLinkActive="sidebar__item--active" class="sidebar__item">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-        </svg>
-        <span>Reviews</span>
-      </a>
-    } @else {
-      <a href="#" class="sidebar__item sidebar__item--disabled" aria-label="Coming soon">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-        </svg>
-        <span>Reviews <em class="sidebar__coming-soon">Coming Soon</em></span>
-      </a>
-    }
-    <a routerLink="/notifications" routerLinkActive="sidebar__item--active" class="sidebar__item">
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-        <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+    <button class="logout-btn" type="button" (click)="onLogout()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+        <polyline points="16 17 21 12 16 7"/>
+        <line x1="21" y1="12" x2="9" y2="12"/>
       </svg>
-      <span>Notifications</span>
-    </a>
-    @if (isAdmin()) {
-      <a routerLink="/admin/repair-shops" routerLinkActive="sidebar__item--active" class="sidebar__item">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
-        </svg>
-        <span>Repair Shops</span>
-      </a>
-      <a routerLink="/admin/users" routerLinkActive="sidebar__item--active" class="sidebar__item">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-          <circle cx="12" cy="7" r="4"></circle>
-        </svg>
-        <span>Users</span>
-      </a>
-    }
-  </nav>
+      Sign out
+    </button>
+  </div>
+
 </aside>
 
-<main class="content">
-  <router-outlet />
-</main>
+<!-- ═══════════════════════════════════════════
+     MAIN AREA
+     ═══════════════════════════════════════════ -->
+<div class="main">
+
+  <!-- TOPBAR -->
+  <header class="topbar" role="banner">
+    <div class="topbar-left">
+      <button class="menu-btn" type="button" aria-label="Toggle navigation"
+              [attr.aria-expanded]="sidebarOpen()" (click)="toggleSidebar()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="3" y1="6" x2="21" y2="6"/>
+          <line x1="3" y1="12" x2="21" y2="12"/>
+          <line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
+      </button>
+      <div class="breadcrumb" aria-label="Breadcrumb">
+        <span>Workspace</span>
+        <span class="breadcrumb-sep" aria-hidden="true">/</span>
+        <b>Overview</b>
+      </div>
+    </div>
+
+    <div class="topbar-right">
+      <!-- Notifications -->
+      <button class="topbar-icon notify-btn" type="button" aria-label="Notifications"
+              (click)="navigateToNotifications()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+          <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+        </svg>
+        @if (unreadCount() > 0) {
+          <i class="notify-dot" aria-label="{{ unreadCount() }} unread notifications"></i>
+        }
+      </button>
+
+      <!-- User pill -->
+      <div class="top-user" role="group" aria-label="User menu">
+        <span class="avatar" aria-hidden="true">{{ userInitial() }}</span>
+        <strong class="top-user-name">{{ userName().split(' ')[0] }}</strong>
+        <button class="top-user-logout" type="button" aria-label="Sign out" (click)="onLogout()" title="Sign out">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+            <polyline points="16 17 21 12 16 7"/>
+            <line x1="21" y1="12" x2="9" y2="12"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- CONTENT -->
+  <div class="content-wrap" role="main">
+    <router-outlet />
+  </div>
+
+</div>

@@ -9,159 +9,320 @@ import { SpinnerComponent } from '../../../../shared/components/spinner/spinner.
   standalone: true,
   imports: [SpinnerComponent],
   template: `
-    <div class="shop-selector">
+    <div class="ss">
+
+      <!-- Loading -->
       @if (isLoading()) {
-        <div class="shop-selector__loading">
+        <div class="ss__loading" aria-label="Searching for nearby shops...">
           <app-spinner size="sm" />
           <span>Searching for nearby repair shops...</span>
         </div>
+
+      <!-- Error -->
       } @else if (serverError()) {
-        <div class="shop-selector__error" role="alert">
+        <div class="ss__error" role="alert">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
           {{ serverError() }}
         </div>
+
+      <!-- Empty -->
       } @else if (shops().length === 0) {
-        <p class="shop-selector__empty">No repair shops found nearby.</p>
+        <div class="ss__empty">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+          </svg>
+          <p>No repair shops found nearby. Try a different location or vehicle type.</p>
+        </div>
+
+      <!-- Shop list -->
       } @else {
-        <div class="shop-selector__list">
+        <div class="ss__list" role="listbox" aria-label="Available repair shops">
           @for (shop of shops(); track shop.id) {
             <div
-              class="shop-selector__item"
-              [class.shop-selector__item--selected]="shop.id === selectedShopId"
+              class="ss__item"
+              role="option"
+              [class.ss__item--selected]="shop.id === selectedShopId"
+              [attr.aria-selected]="shop.id === selectedShopId"
               (click)="selectShop(shop)"
+              tabindex="0"
+              (keydown.enter)="selectShop(shop)"
+              (keydown.space)="selectShop(shop)"
             >
-              <div class="shop-selector__name">{{ shop.shopName }}</div>
-              <div class="shop-selector__meta">
-                @if (shop.rating !== undefined && shop.rating !== null) {
-                  <span class="shop-selector__rating">★ {{ shop.rating }}</span>
+              <!-- Selected indicator -->
+              <span class="ss__radio" [class.ss__radio--checked]="shop.id === selectedShopId" aria-hidden="true">
+                @if (shop.id === selectedShopId) {
+                  <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                       stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
                 }
-                @if (shop.phone) {
-                  <span class="shop-selector__phone">{{ shop.phone }}</span>
-                }
-              </div>
-              @if (shop.vehicleTypesServiced) {
-                <div class="shop-selector__vehicles">
-                  @if (shop.vehicleTypesServiced.includes('two_wheeler')) {
-                    <span class="shop-selector__vehicle-badge">Two Wheeler</span>
+              </span>
+
+              <!-- Shop info -->
+              <div class="ss__info">
+                <div class="ss__name">{{ shop.shopName }}</div>
+                <div class="ss__meta">
+                  @if (shop.rating !== undefined && shop.rating !== null) {
+                    <span class="ss__rating">
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b"
+                           stroke-width="1" aria-hidden="true">
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                      </svg>
+                      {{ shop.rating }}
+                    </span>
                   }
-                  @if (shop.vehicleTypesServiced.includes('four_wheeler')) {
-                    <span class="shop-selector__vehicle-badge">Four Wheeler</span>
+                  @if (shop.phone) {
+                    <span class="ss__phone">{{ shop.phone }}</span>
                   }
                 </div>
+                @if (shop.vehicleTypesServiced) {
+                  <div class="ss__vehicles">
+                    @if (shop.vehicleTypesServiced.includes('two_wheeler')) {
+                      <span class="ss__vbadge">🏍️ Two Wheeler</span>
+                    }
+                    @if (shop.vehicleTypesServiced.includes('four_wheeler')) {
+                      <span class="ss__vbadge">🚗 Four Wheeler</span>
+                    }
+                  </div>
+                }
+              </div>
+
+              @if (shop.id === selectedShopId) {
+                <span class="ss__selected-label">Selected</span>
               }
             </div>
           }
         </div>
       }
 
+      <!-- Retry -->
       <button
         type="button"
-        class="shop-selector__retry"
+        class="ss__retry"
         (click)="retrySearch()"
         [disabled]="isLoading()"
       >
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <polyline points="1 4 1 10 7 10"/>
+          <path d="M3.51 15a9 9 0 1 0 .49-4.6"/>
+        </svg>
         Retry Search
       </button>
+
     </div>
   `,
   styles: [`
-    .shop-selector {
+    /* ── Wrapper ─────────────────────────────── */
+    .ss {
       display: flex;
       flex-direction: column;
-      gap: var(--space-3);
+      gap: 10px;
     }
 
-    .shop-selector__loading {
+    /* ── Loading ─────────────────────────────── */
+    .ss__loading {
       display: flex;
       align-items: center;
-      gap: var(--space-2);
-      padding: var(--space-4);
-      color: var(--color-text-secondary);
-    }
-
-    .shop-selector__error {
-      padding: var(--space-3);
-      background: #fef2f2;
-      border: 1px solid var(--color-danger);
-      border-radius: var(--radius-md);
+      gap: 10px;
+      padding: 16px 14px;
+      color: var(--color-text-muted);
       font-size: 13px;
-      color: var(--color-danger);
+      background: #fafbff;
+      border-radius: 12px;
+      border: 1px solid var(--color-border);
     }
 
-    .shop-selector__empty {
-      padding: var(--space-3);
-      color: var(--color-text-secondary);
-      font-size: 14px;
+    /* ── Error ───────────────────────────────── */
+    .ss__error {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 10px 13px;
+      background: rgba(239,68,68,0.05);
+      border: 1px solid rgba(239,68,68,0.2);
+      border-radius: 10px;
+      font-size: 12.5px;
+      color: #b91c1c;
+      line-height: 1.5;
     }
 
-    .shop-selector__list {
+    /* ── Empty ───────────────────────────────── */
+    .ss__empty {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 14px;
+      background: #fafbff;
+      border: 1.5px dashed #c7d2fe;
+      border-radius: 12px;
+      color: var(--color-text-muted);
+    }
+
+    .ss__empty svg {
+      color: #6366f1;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .ss__empty p {
+      font-size: 12.5px;
+      line-height: 1.55;
+      margin: 0;
+    }
+
+    /* ── Shop list ───────────────────────────── */
+    .ss__list {
       display: flex;
       flex-direction: column;
-      gap: var(--space-2);
+      gap: 8px;
     }
 
-    .shop-selector__item {
-      padding: var(--space-3);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-md);
-      background: var(--color-surface);
+    /* ── Shop item ───────────────────────────── */
+    .ss__item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 13px 14px;
+      background: #fff;
+      border: 1.5px solid var(--color-border);
+      border-radius: 12px;
       cursor: pointer;
-      transition: border-color var(--transition-fast), background var(--transition-fast);
+      outline: none;
+      transition:
+        border-color 140ms ease,
+        background 140ms ease,
+        box-shadow 140ms ease;
     }
 
-    .shop-selector__item:hover {
-      background: var(--color-hover);
+    .ss__item:hover {
+      border-color: #c7d2fe;
+      background: #fafaff;
     }
 
-    .shop-selector__item--selected {
-      border-color: var(--color-primary);
-      background: var(--color-primary-subtle);
+    .ss__item--selected {
+      border-color: #6366f1;
+      background: #f5f3ff;
+      box-shadow: 0 0 0 3px rgba(99,102,241,0.1);
     }
 
-    .shop-selector__name {
-      font-size: 14px;
+    .ss__item:focus-visible {
+      box-shadow: 0 0 0 3px rgba(79,70,229,0.22);
+    }
+
+    /* Radio circle indicator */
+    .ss__radio {
+      display: grid;
+      place-items: center;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 2px solid var(--color-border);
+      flex-shrink: 0;
+      margin-top: 2px;
+      transition: border-color 140ms ease, background 140ms ease;
+    }
+
+    .ss__radio--checked {
+      border-color: #6366f1;
+      background: #6366f1;
+      color: #fff;
+    }
+
+    /* Shop info */
+    .ss__info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .ss__name {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: #111827;
+      margin-bottom: 4px;
+    }
+
+    .ss__meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      font-size: 12px;
+      color: var(--color-text-muted);
+    }
+
+    .ss__rating {
+      display: flex;
+      align-items: center;
+      gap: 3px;
       font-weight: 600;
-      color: var(--color-text);
-      margin-bottom: var(--space-1);
+      color: #92400e;
     }
 
-    .shop-selector__meta {
+    .ss__phone {
+      color: var(--color-text-muted);
+    }
+
+    .ss__vehicles {
       display: flex;
-      gap: var(--space-3);
-      font-size: 13px;
-      color: var(--color-text-secondary);
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-top: 6px;
     }
 
-    .shop-selector__rating {
-      color: #f59e0b;
+    .ss__vbadge {
+      font-size: 10.5px;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: #eef2ff;
+      color: #4338ca;
+      font-weight: 600;
     }
 
-    .shop-selector__vehicles {
-      display: flex;
-      gap: var(--space-1);
-      margin-top: var(--space-1);
+    .ss__selected-label {
+      flex-shrink: 0;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: #ecfdf5;
+      color: #047857;
+      border: 1px solid rgba(16,185,129,0.2);
+      margin-top: 2px;
     }
 
-    .shop-selector__vehicle-badge {
-      font-size: 11px;
-      padding: 2px 8px;
-      background: var(--color-border);
-      border-radius: var(--radius-sm);
-      color: var(--color-text-secondary);
-    }
-
-    .shop-selector__retry {
-      padding: var(--space-2) var(--space-3);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-md);
+    /* ── Retry button ────────────────────────── */
+    .ss__retry {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 13px;
+      border: 1.5px solid var(--color-border);
+      border-radius: 8px;
       background: var(--color-surface);
-      font-size: 13px;
-      color: var(--color-text);
+      color: var(--color-text-muted);
+      font-size: 12px;
+      font-weight: 600;
       cursor: pointer;
-      transition: background var(--transition-fast);
+      font-family: var(--font-body);
+      align-self: flex-start;
+      transition: background 140ms ease, border-color 140ms ease, color 140ms ease;
     }
 
-    .shop-selector__retry:hover {
+    .ss__retry:hover:not(:disabled) {
       background: var(--color-hover);
+      border-color: #c7d2fe;
+      color: #4338ca;
+    }
+
+    .ss__retry:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
     }
   `],
 })

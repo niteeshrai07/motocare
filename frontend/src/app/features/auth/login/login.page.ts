@@ -6,12 +6,11 @@ import { AuthService } from '../../../core/services/auth.service';
 import { LoginCredentials } from '../../../core/models/auth.model';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
 import { InputComponent } from '../../../shared/components/input/input.component';
-import { CardComponent } from '../../../shared/components/card/card.component';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [ReactiveFormsModule, RouterLink, ButtonComponent, InputComponent, CardComponent],
+  imports: [ReactiveFormsModule, RouterLink, ButtonComponent, InputComponent],
   templateUrl: './login.page.html',
   styleUrl: './login.page.scss',
 })

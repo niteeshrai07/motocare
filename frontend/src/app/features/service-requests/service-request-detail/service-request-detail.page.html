@@ -1,278 +1,508 @@
-<div class="sr-detail-page">
+<div class="srd">
+
+  <!-- ══════════════════════════════════════════
+       GLOBAL MESSAGES
+       ══════════════════════════════════════════ -->
   @if (serverError()) {
-    <div class="sr-error" role="alert">
-      {{ serverError() }}
+    <div class="srd__banner srd__banner--error" role="alert">
+      <span class="srd__banner-icon" aria-hidden="true">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      </span>
+      <div>
+        <strong>Error</strong>
+        <p>{{ serverError() }}</p>
+      </div>
     </div>
   }
 
   @if (successMessage()) {
-    <div class="sr-success" role="alert">
-      {{ successMessage() }}
+    <div class="srd__banner srd__banner--success" role="status" aria-live="polite">
+      <span class="srd__banner-icon" aria-hidden="true">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      </span>
+      <div>
+        <strong>Done</strong>
+        <p>{{ successMessage() }}</p>
+      </div>
     </div>
   }
 
+  <!-- ══════════════════════════════════════════
+       LOADING SKELETON
+       ══════════════════════════════════════════ -->
   @if (isLoading()) {
-    <app-card title="Service Request" subtitle="Loading service request details...">
-      <div class="skeleton">
-        <div class="skeleton__row"></div>
-        <div class="skeleton__row skeleton__row--short"></div>
-        <div class="skeleton__row"></div>
-        <div class="skeleton__row skeleton__row--short"></div>
-        <div class="skeleton__row"></div>
-        <div class="skeleton__row"></div>
-        <div class="skeleton__row skeleton__row--short"></div>
+    <div class="srd__skeleton-page">
+      <!-- Back button skeleton -->
+      <div class="srd__sk srd__sk--back"></div>
+      <!-- Hero skeleton -->
+      <div class="srd__skeleton-hero">
+        <div class="srd__sk srd__sk--title"></div>
+        <div class="srd__sk srd__sk--subtitle"></div>
+        <div class="srd__sk srd__sk--badge"></div>
       </div>
-    </app-card>
-  } @else if (request()) {
-    <app-card title="Service Request" subtitle="View service request details">
-      <div class="sr-detail-body">
-        <div class="sr-detail-section sr-detail-section--header">
-          <div class="sr-detail-header-left">
-            <app-request-status-badge [status]="request()!.status" />
-            @if (isExpired()) {
-              <span class="sr-expired-indicator" title="This request has expired">
-                ⚠ Expired
-              </span>
-            }
-          </div>
-          <span class="sr-detail-id">#SR-{{ request()!.id.substring(0, 8) }}</span>
+      <!-- Grid skeleton -->
+      <div class="srd__skeleton-grid">
+        <div class="srd__skeleton-card">
+          <div class="srd__sk srd__sk--label"></div>
+          <div class="srd__sk srd__sk--line"></div>
+          <div class="srd__sk srd__sk--line srd__sk--short"></div>
+          <div class="srd__sk srd__sk--line"></div>
+          <div class="srd__sk srd__sk--line srd__sk--short"></div>
         </div>
-
-        <div class="sr-detail-section">
-          <h3 class="sr-detail-label">Vehicle</h3>
-          <div class="sr-detail-value sr-detail-vehicle">
-            <span class="sr-detail-vehicle-icon">{{ vehicleIcon() }}</span>
-            <span>{{ vehicleLabel() }}</span>
-          </div>
+        <div class="srd__skeleton-card">
+          <div class="srd__sk srd__sk--label"></div>
+          <div class="srd__sk srd__sk--line srd__sk--short"></div>
+          <div class="srd__sk srd__sk--line srd__sk--short"></div>
+          <div class="srd__sk srd__sk--line srd__sk--short"></div>
         </div>
+      </div>
+    </div>
+  }
 
-        <div class="sr-detail-section">
-          <h3 class="sr-detail-label">Issue Description</h3>
-          <p class="sr-detail-value sr-detail-description">{{ request()!.issueDescription }}</p>
+  <!-- ══════════════════════════════════════════
+       MAIN CONTENT
+       ══════════════════════════════════════════ -->
+  @else if (request()) {
+
+    <!-- ── Back navigation ── -->
+    <div class="srd__topbar">
+      <button type="button" class="srd__back" (click)="goBack()" aria-label="Back to Service Requests">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
+        Service Requests
+      </button>
+    </div>
+
+    <!-- ── Page header ── -->
+    <div class="srd__header">
+      <div class="srd__header-main">
+        <p class="srd__header-eyebrow">Service Request</p>
+        <h1 class="srd__header-title">{{ request()!.issueDescription }}</h1>
+        <div class="srd__header-meta">
+          <span class="srd__header-id">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 12h6M9 15h4"/></svg>
+            #SR-{{ shortId() }}
+          </span>
+          <app-request-status-badge [status]="request()!.status" />
+          @if (isExpired()) {
+            <span class="srd__expired-badge" aria-label="This request has expired">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              Expired
+            </span>
+          }
         </div>
+      </div>
+      <div class="srd__header-vehicle">
+        <span class="srd__header-vehicle-icon" aria-hidden="true">{{ vehicleIcon() }}</span>
+        <span class="srd__header-vehicle-label">{{ vehicleLabel() }}</span>
+      </div>
+    </div>
 
-        @if (hasLocation()) {
-          <div class="sr-detail-section">
-            <h3 class="sr-detail-label">Location</h3>
-            <div class="sr-detail-coordinates">
-              <span class="sr-detail-coordinates__label">Latitude:</span>
-              <span class="sr-detail-coordinates__value">{{ request()!.location.coordinates[1] }}</span>
-              <span class="sr-detail-coordinates__label">Longitude:</span>
-              <span class="sr-detail-coordinates__value">{{ request()!.location.coordinates[0] }}</span>
+    <!-- ══════════════════════════════════════════
+         TWO-COLUMN CONTENT GRID
+         ══════════════════════════════════════════ -->
+    <div class="srd__grid">
+
+      <!-- ────────────────────────────────────
+           LEFT COLUMN
+           ──────────────────────────────────── -->
+      <div class="srd__left">
+
+        <!-- ── Service Information ── -->
+        <section class="srd__card" aria-labelledby="srd-info-heading">
+          <header class="srd__card-head">
+            <span class="srd__card-icon" aria-hidden="true">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+            </span>
+            <h2 class="srd__card-title" id="srd-info-heading">Service Information</h2>
+          </header>
+
+          <dl class="srd__dl">
+            <!-- Vehicle -->
+            <div class="srd__dl-row">
+              <dt class="srd__dl-label">Vehicle</dt>
+              <dd class="srd__dl-value srd__dl-value--vehicle">
+                <span aria-hidden="true">{{ vehicleIcon() }}</span>
+                {{ vehicleLabel() }}
+              </dd>
             </div>
-            <span class="sr-detail-coordinates__combined">{{ formatCoordinates() }}</span>
-          </div>
-        }
 
-        <div class="sr-detail-section">
-          <h3 class="sr-detail-label">Customer</h3>
-          <p class="sr-detail-value">Name: {{ request()!.customer.name }}</p>
-          @if (request()!.customer.phone) {
-            <p class="sr-detail-value">Phone: {{ request()!.customer.phone }}</p>
-          }
-        </div>
-
-        <div class="sr-detail-section">
-          <h3 class="sr-detail-label">Repair Shop</h3>
-          <p class="sr-detail-value">Name: {{ request()!.shop.shopName }}</p>
-          @if (request()!.shop.phone) {
-            <p class="sr-detail-value">Phone: {{ request()!.shop.phone }}</p>
-          }
-        </div>
-
-        @if (request()!.estimatedCost !== null && request()!.estimatedCost !== undefined) {
-          <div class="sr-detail-section">
-            <h3 class="sr-detail-label">Estimated Cost</h3>
-            <p class="sr-detail-value">{{ request()!.estimatedCost | currency }}</p>
-          </div>
-        }
-
-        @if (request()!.estimatedDuration) {
-          <div class="sr-detail-section">
-            <h3 class="sr-detail-label">Estimated Duration</h3>
-            <p class="sr-detail-value">{{ request()!.estimatedDuration }}</p>
-          </div>
-        }
-
-        @if (request()!.mechanicNotes) {
-          <div class="sr-detail-section">
-            <h3 class="sr-detail-label">Mechanic Notes</h3>
-            <p class="sr-detail-value sr-detail-notes">{{ request()!.mechanicNotes }}</p>
-          </div>
-        }
-
-        <div class="sr-detail-section sr-detail-section--meta">
-          <div class="sr-detail-meta-item">
-            <span class="sr-detail-meta-label">Created</span>
-            <span class="sr-detail-meta-value">{{ request()!.createdAt | date: 'medium' }}</span>
-          </div>
-          <div class="sr-detail-meta-item">
-            <span class="sr-detail-meta-label">Updated</span>
-            <span class="sr-detail-meta-value">{{ request()!.updatedAt | date: 'medium' }}</span>
-          </div>
-          <div class="sr-detail-meta-item">
-            <span class="sr-detail-meta-label">Expires</span>
-            <span class="sr-detail-meta-value">{{ request()!.expiresAt | date: 'medium' }}</span>
-          </div>
-        </div>
-
-        @if (showActions()) {
-          <div class="sr-detail-actions">
-            @if (isConfirmingCancel()) {
-              <div class="sr-cancel-confirm">
-                <p class="sr-cancel-confirm__text">Are you sure you want to cancel?</p>
-                <div class="sr-cancel-confirm__buttons">
-                  <app-button type="button" variant="primary" (click)="confirmCancel()" [disabled]="isActionLoading()">
-                    {{ isActionLoading() ? 'Cancelling...' : 'Yes, Cancel' }}
-                  </app-button>
-                  <app-button type="button" variant="outline" (click)="cancelCancel()" [disabled]="isActionLoading()">
-                    No
-                  </app-button>
-                </div>
-              </div>
-            } @else {
-              <div class="sr-detail-action-buttons">
-                @if (canAccept()) {
-                  <app-button type="button" variant="primary" (click)="accept()" [disabled]="isActionLoading()">
-                    {{ isActionLoading() ? 'Accepting...' : 'Accept Quote' }}
-                  </app-button>
-                }
-                @if (canCancel()) {
-                  <app-button type="button" variant="outline" (click)="startCancel()" [disabled]="isActionLoading()">
-                    Cancel Request
-                  </app-button>
-                }
+            <!-- Repair Shop -->
+            <div class="srd__dl-row">
+              <dt class="srd__dl-label">Repair Shop</dt>
+              <dd class="srd__dl-value">{{ request()!.shop.shopName }}</dd>
+            </div>
+            @if (request()!.shop.phone) {
+              <div class="srd__dl-row">
+                <dt class="srd__dl-label">Shop Phone</dt>
+                <dd class="srd__dl-value">
+                  <a [href]="'tel:' + request()!.shop.phone" class="srd__link">{{ request()!.shop.phone }}</a>
+                </dd>
               </div>
             }
-          </div>
-        }
 
-        @if (showMechanicActions()) {
-          <div class="sr-detail-actions">
-            @if (isConfirmingReject()) {
-              <div class="sr-cancel-confirm">
-                <p class="sr-cancel-confirm__text">Are you sure you want to reject this request?</p>
-                <div class="sr-cancel-confirm__buttons">
-                  <app-button type="button" variant="primary" (click)="confirmReject()" [disabled]="isActionLoading()">
-                    {{ isActionLoading() ? 'Rejecting...' : 'Yes, Reject' }}
-                  </app-button>
-                  <app-button type="button" variant="outline" (click)="cancelReject()" [disabled]="isActionLoading()">
-                    No
-                  </app-button>
-                </div>
-              </div>
-            } @else if (isQuoteFormExpanded()) {
-              <div class="sr-quote-form">
-                <h3 class="sr-quote-form__title">Quote Request</h3>
-                <form [formGroup]="quoteForm" autocomplete="off" novalidate>
-                  <div class="sr-quote-form__field">
-                    <app-input
-                      formControlName="estimatedCost"
-                      label="Estimated Cost"
-                      type="number"
-                      placeholder="0.00"
-                      [required]="true"
-                      [error]="quoteCostCtrl.touched && quoteCostCtrl.invalid ? 'Estimated cost is required' : ''"
-                    />
-                  </div>
-                  <div class="sr-quote-form__field">
-                    <app-input
-                      formControlName="estimatedDuration"
-                      label="Estimated Duration"
-                      placeholder="e.g. 2 hours"
-                      [required]="true"
-                      [error]="quoteDurationCtrl.touched && quoteDurationCtrl.invalid ? 'Estimated duration is required' : ''"
-                    />
-                  </div>
-                  <div class="sr-quote-form__field">
-                    <app-input
-                      formControlName="mechanicNotes"
-                      label="Mechanic Notes"
-                      placeholder="Optional notes"
-                    />
-                  </div>
-                  <div class="sr-detail-action-buttons">
-                    <app-button type="button" variant="primary" (click)="submitQuote()" [disabled]="quoteForm.invalid || isActionLoading()">
-                      {{ isActionLoading() ? 'Submitting...' : 'Submit Quote' }}
-                    </app-button>
-                    <app-button type="button" variant="outline" (click)="toggleQuoteForm()" [disabled]="isActionLoading()">
-                      Cancel
-                    </app-button>
-                  </div>
-                </form>
-              </div>
-            } @else {
-              <div class="sr-detail-action-buttons">
-                @if (canQuote()) {
-                  <app-button type="button" variant="primary" (click)="toggleQuoteForm()" [disabled]="isActionLoading()">
-                    Quote
-                  </app-button>
-                }
-                @if (canReject()) {
-                  <app-button type="button" variant="outline" (click)="startReject()" [disabled]="isActionLoading()">
-                    Reject
-                  </app-button>
-                }
-                @if (canStart()) {
-                  <app-button type="button" variant="primary" (click)="startWork()" [disabled]="isActionLoading()">
-                    {{ isActionLoading() ? 'Starting...' : 'Start Work' }}
-                  </app-button>
-                }
-                @if (canComplete()) {
-                  <app-button type="button" variant="primary" (click)="completeWork()" [disabled]="isActionLoading()">
-                    {{ isActionLoading() ? 'Completing...' : 'Complete Work' }}
-                  </app-button>
-                }
+            <!-- Estimated cost -->
+            @if (request()!.estimatedCost !== null && request()!.estimatedCost !== undefined) {
+              <div class="srd__dl-row">
+                <dt class="srd__dl-label">Estimated Cost</dt>
+                <dd class="srd__dl-value srd__dl-value--cost">
+                  {{ request()!.estimatedCost | currency }}
+                </dd>
               </div>
             }
-          </div>
+
+            <!-- Estimated duration -->
+            @if (request()!.estimatedDuration) {
+              <div class="srd__dl-row">
+                <dt class="srd__dl-label">Estimated Duration</dt>
+                <dd class="srd__dl-value">{{ request()!.estimatedDuration }}</dd>
+              </div>
+            }
+          </dl>
+
+          <!-- Mechanic Notes -->
+          @if (request()!.mechanicNotes) {
+            <div class="srd__notes">
+              <p class="srd__notes-label">Mechanic Notes</p>
+              <p class="srd__notes-text">{{ request()!.mechanicNotes }}</p>
+            </div>
+          }
+        </section>
+
+        <!-- ── Issue Description ── -->
+        <section class="srd__card" aria-labelledby="srd-issue-heading">
+          <header class="srd__card-head">
+            <span class="srd__card-icon" aria-hidden="true">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            </span>
+            <h2 class="srd__card-title" id="srd-issue-heading">Issue Description</h2>
+          </header>
+          <p class="srd__description">{{ request()!.issueDescription }}</p>
+        </section>
+
+        <!-- ── Location ── -->
+        @if (hasLocation()) {
+          <section class="srd__card" aria-labelledby="srd-location-heading">
+            <header class="srd__card-head">
+              <span class="srd__card-icon" aria-hidden="true">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
+              </span>
+              <h2 class="srd__card-title" id="srd-location-heading">Breakdown Location</h2>
+            </header>
+            <div class="srd__location">
+              <dl class="srd__dl">
+                <div class="srd__dl-row">
+                  <dt class="srd__dl-label">Latitude</dt>
+                  <dd class="srd__dl-value srd__dl-value--mono">{{ request()!.location.coordinates[1] }}</dd>
+                </div>
+                <div class="srd__dl-row">
+                  <dt class="srd__dl-label">Longitude</dt>
+                  <dd class="srd__dl-value srd__dl-value--mono">{{ request()!.location.coordinates[0] }}</dd>
+                </div>
+              </dl>
+              <div class="srd__coords-combined">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
+                {{ formatCoordinates() }}
+              </div>
+            </div>
+          </section>
         }
+
       </div>
-      </app-card>
+
+      <!-- ────────────────────────────────────
+           RIGHT COLUMN
+           ──────────────────────────────────── -->
+      <div class="srd__right">
+
+        <!-- ── Contacts ── -->
+        <section class="srd__card" aria-labelledby="srd-contacts-heading">
+          <header class="srd__card-head">
+            <span class="srd__card-icon" aria-hidden="true">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </span>
+            <h2 class="srd__card-title" id="srd-contacts-heading">Contacts</h2>
+          </header>
+
+          <div class="srd__contacts">
+            <!-- Customer -->
+            <div class="srd__contact-block">
+              <p class="srd__contact-role">Customer</p>
+              <p class="srd__contact-name">{{ request()!.customer.name }}</p>
+              @if (request()!.customer.phone) {
+                <a [href]="'tel:' + request()!.customer.phone" class="srd__contact-phone">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.29 6.29l1.17-1.17a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                  {{ request()!.customer.phone }}
+                </a>
+              }
+            </div>
+
+            <div class="srd__contact-divider"></div>
+
+            <!-- Shop -->
+            <div class="srd__contact-block">
+              <p class="srd__contact-role">Repair Shop</p>
+              <p class="srd__contact-name">{{ request()!.shop.shopName }}</p>
+              @if (request()!.shop.phone) {
+                <a [href]="'tel:' + request()!.shop.phone" class="srd__contact-phone">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.29 6.29l1.17-1.17a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                  {{ request()!.shop.phone }}
+                </a>
+              }
+            </div>
+          </div>
+        </section>
+
+        <!-- ── Timeline / Dates ── -->
+        <section class="srd__card" aria-labelledby="srd-timeline-heading">
+          <header class="srd__card-head">
+            <span class="srd__card-icon" aria-hidden="true">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </span>
+            <h2 class="srd__card-title" id="srd-timeline-heading">Timeline</h2>
+          </header>
+          <dl class="srd__dl">
+            <div class="srd__dl-row">
+              <dt class="srd__dl-label">Created</dt>
+              <dd class="srd__dl-value">
+                {{ request()!.createdAt | date:'d MMM yyyy, h:mm a' }}
+                <span class="srd__relative">{{ formatRelativeTime(request()!.createdAt) }}</span>
+              </dd>
+            </div>
+            <div class="srd__dl-row">
+              <dt class="srd__dl-label">Last Updated</dt>
+              <dd class="srd__dl-value">
+                {{ request()!.updatedAt | date:'d MMM yyyy, h:mm a' }}
+                <span class="srd__relative">{{ formatRelativeTime(request()!.updatedAt) }}</span>
+              </dd>
+            </div>
+            <div class="srd__dl-row">
+              <dt class="srd__dl-label">Expires</dt>
+              <dd class="srd__dl-value" [class.srd__dl-value--expired]="isExpired()">
+                {{ request()!.expiresAt | date:'d MMM yyyy, h:mm a' }}
+                @if (isExpired()) {
+                  <span class="srd__relative srd__relative--danger">Expired</span>
+                }
+              </dd>
+            </div>
+          </dl>
+        </section>
+
+        <!-- ── Customer Actions ── -->
+        @if (showActions()) {
+          <section class="srd__card srd__card--actions" aria-labelledby="srd-actions-heading">
+            <header class="srd__card-head">
+              <span class="srd__card-icon" aria-hidden="true">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+              </span>
+              <h2 class="srd__card-title" id="srd-actions-heading">Actions</h2>
+            </header>
+            <div class="srd__actions">
+              @if (canAccept()) {
+                <button type="button" class="srd__btn srd__btn--primary" (click)="accept()" [disabled]="isActionLoading()">
+                  @if (isActionLoading()) { Accepting... } @else { Accept Quote }
+                </button>
+              }
+              @if (canCancel()) {
+                <button type="button" class="srd__btn srd__btn--danger-outline" (click)="startCancel()" [disabled]="isActionLoading()">
+                  Cancel Request
+                </button>
+              }
+            </div>
+          </section>
+        }
+
+        <!-- ── Cancel Confirmation ── -->
+        @if (isConfirmingCancel()) {
+          <div class="srd__confirm srd__confirm--danger" role="alertdialog" aria-labelledby="cancel-confirm-title">
+            <div class="srd__confirm-icon" aria-hidden="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+            </div>
+            <div class="srd__confirm-body">
+              <p class="srd__confirm-title" id="cancel-confirm-title">Cancel this request?</p>
+              <p class="srd__confirm-desc">This action cannot be undone.</p>
+              <div class="srd__confirm-actions">
+                <button type="button" class="srd__btn srd__btn--danger" (click)="confirmCancel()" [disabled]="isActionLoading()">
+                  {{ isActionLoading() ? 'Cancelling...' : 'Yes, Cancel' }}
+                </button>
+                <button type="button" class="srd__btn srd__btn--ghost" (click)="cancelCancel()" [disabled]="isActionLoading()">
+                  Keep Request
+                </button>
+              </div>
+            </div>
+          </div>
+        }
+
+        <!-- ── Mechanic Actions ── -->
+        @if (showMechanicActions()) {
+          <section class="srd__card srd__card--actions" aria-labelledby="srd-mech-actions-heading">
+            <header class="srd__card-head">
+              <span class="srd__card-icon" aria-hidden="true">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+              </span>
+              <h2 class="srd__card-title" id="srd-mech-actions-heading">Mechanic Actions</h2>
+            </header>
+            <div class="srd__actions">
+              @if (canQuote()) {
+                <button type="button" class="srd__btn srd__btn--primary" (click)="toggleQuoteForm()" [disabled]="isActionLoading()">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  Provide Quote
+                </button>
+              }
+              @if (canReject()) {
+                <button type="button" class="srd__btn srd__btn--danger-outline" (click)="startReject()" [disabled]="isActionLoading()">
+                  Reject Request
+                </button>
+              }
+              @if (canStart()) {
+                <button type="button" class="srd__btn srd__btn--primary" (click)="startWork()" [disabled]="isActionLoading()">
+                  {{ isActionLoading() ? 'Starting...' : 'Start Work' }}
+                </button>
+              }
+              @if (canComplete()) {
+                <button type="button" class="srd__btn srd__btn--success" (click)="completeWork()" [disabled]="isActionLoading()">
+                  {{ isActionLoading() ? 'Completing...' : 'Complete Work' }}
+                </button>
+              }
+            </div>
+          </section>
+        }
+
+        <!-- ── Reject Confirmation ── -->
+        @if (isConfirmingReject()) {
+          <div class="srd__confirm srd__confirm--danger" role="alertdialog" aria-labelledby="reject-confirm-title">
+            <div class="srd__confirm-icon" aria-hidden="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+            </div>
+            <div class="srd__confirm-body">
+              <p class="srd__confirm-title" id="reject-confirm-title">Reject this request?</p>
+              <p class="srd__confirm-desc">The customer will be notified.</p>
+              <div class="srd__confirm-actions">
+                <button type="button" class="srd__btn srd__btn--danger" (click)="confirmReject()" [disabled]="isActionLoading()">
+                  {{ isActionLoading() ? 'Rejecting...' : 'Yes, Reject' }}
+                </button>
+                <button type="button" class="srd__btn srd__btn--ghost" (click)="cancelReject()" [disabled]="isActionLoading()">
+                  Keep Request
+                </button>
+              </div>
+            </div>
+          </div>
+        }
+
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════
+         QUOTE FORM (full-width, below grid)
+         ══════════════════════════════════════════ -->
+    @if (isQuoteFormExpanded()) {
+      <section class="srd__card srd__quote-section" aria-labelledby="srd-quote-heading">
+        <header class="srd__card-head">
+          <span class="srd__card-icon" aria-hidden="true">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          </span>
+          <h2 class="srd__card-title" id="srd-quote-heading">Submit Quote</h2>
+        </header>
+        <form [formGroup]="quoteForm" autocomplete="off" novalidate class="srd__quote-form">
+          <div class="srd__quote-fields">
+            <div class="srd__qfield">
+              <label class="srd__qlabel" for="qf-cost">Estimated Cost <span class="srd__req">*</span></label>
+              <input
+                id="qf-cost"
+                type="number"
+                formControlName="estimatedCost"
+                placeholder="0.00"
+                class="srd__qinput"
+                [class.srd__qinput--error]="quoteCostCtrl.touched && quoteCostCtrl.invalid"
+              />
+              @if (quoteCostCtrl.touched && quoteCostCtrl.invalid) {
+                <span class="srd__qerr" role="alert">Estimated cost is required</span>
+              }
+            </div>
+            <div class="srd__qfield">
+              <label class="srd__qlabel" for="qf-duration">Estimated Duration <span class="srd__req">*</span></label>
+              <input
+                id="qf-duration"
+                type="text"
+                formControlName="estimatedDuration"
+                placeholder="e.g. 2 hours"
+                class="srd__qinput"
+                [class.srd__qinput--error]="quoteDurationCtrl.touched && quoteDurationCtrl.invalid"
+              />
+              @if (quoteDurationCtrl.touched && quoteDurationCtrl.invalid) {
+                <span class="srd__qerr" role="alert">Estimated duration is required</span>
+              }
+            </div>
+            <div class="srd__qfield srd__qfield--full">
+              <label class="srd__qlabel" for="qf-notes">Mechanic Notes</label>
+              <input
+                id="qf-notes"
+                type="text"
+                formControlName="mechanicNotes"
+                placeholder="Optional notes for the customer"
+                class="srd__qinput"
+              />
+            </div>
+          </div>
+          <div class="srd__quote-actions">
+            <button type="button" class="srd__btn srd__btn--primary" (click)="submitQuote()" [disabled]="quoteForm.invalid || isActionLoading()">
+              {{ isActionLoading() ? 'Submitting...' : 'Submit Quote' }}
+            </button>
+            <button type="button" class="srd__btn srd__btn--ghost" (click)="toggleQuoteForm()" [disabled]="isActionLoading()">
+              Cancel
+            </button>
+          </div>
+        </form>
+      </section>
     }
 
+    <!-- ══════════════════════════════════════════
+         REVIEW SECTION
+         ══════════════════════════════════════════ -->
     @if (canViewReview()) {
-      <app-card title="Review" subtitle="Customer review for this service">
+      <section class="srd__card srd__review-section" aria-labelledby="srd-review-heading">
+        <header class="srd__card-head">
+          <span class="srd__card-icon" aria-hidden="true">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          </span>
+          <h2 class="srd__card-title" id="srd-review-heading">Review</h2>
+        </header>
+
         @if (isReviewLoading()) {
-          <div style="padding: 16px; text-align: center; color: var(--color-text-secondary);">
-            <p>Loading review...</p>
+          <div class="srd__review-loading">
+            <svg class="srd__spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+            Loading review...
           </div>
+
         } @else if (reviewError()) {
-          <div class="sr-error" role="alert">
-            {{ reviewError() }}
+          <div class="srd__banner srd__banner--error srd__banner--compact" role="alert">
+            <span class="srd__banner-icon" aria-hidden="true">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            </span>
+            <p>{{ reviewError() }}</p>
           </div>
+
         } @else if (review()) {
+
+          <!-- Editing review -->
           @if (isEditingReview()) {
-            <form [formGroup]="reviewForm" (ngSubmit)="submitReviewEdit()" class="sr-quote-form" autocomplete="off" novalidate>
-              <div class="sr-quote-form__field" style="gap: 8px;">
-                <label class="sr-detail-label">Rating</label>
-                <div style="display: flex; gap: 4px; cursor: pointer; user-select: none;" (click)="reviewRatingCtrl.markAsTouched()">
+            <form [formGroup]="reviewForm" (ngSubmit)="submitReviewEdit()" autocomplete="off" novalidate class="srd__review-form">
+              <div class="srd__rf-field">
+                <label class="srd__qlabel" id="edit-rating-label">Rating <span class="srd__req">*</span></label>
+                <div class="srd__stars" role="group" aria-labelledby="edit-rating-label" (click)="reviewRatingCtrl.markAsTouched()">
                   @for (star of [1, 2, 3, 4, 5]; track $index) {
-                    <span
-                      type="button"
-                      class="sr-rating-star"
-                      [class.sr-rating-star--filled]="reviewForm.value.rating >= star"
-                      (click)="rateStar(star - 1)"
-                      [attr.data-rating]="star"
-                    >
+                    <button type="button" class="srd__star" [class.srd__star--filled]="reviewForm.value.rating >= star" (click)="rateStar(star - 1)" [attr.aria-label]="star + ' star'" [attr.data-rating]="star">
                       {{ reviewForm.value.rating >= star ? '★' : '☆' }}
-                    </span>
+                    </button>
                   }
                 </div>
                 @if (reviewRatingCtrl.touched && reviewRatingCtrl.invalid) {
-                  <span style="font-size: 12px; color: var(--color-danger);">Please select a rating between 1 and 5</span>
+                  <span class="srd__qerr" role="alert">Please select a rating between 1 and 5</span>
                 }
               </div>
-
-              <div class="sr-quote-form__field">
-                <app-input
-                  formControlName="comment"
-                  label="Comment"
-                  placeholder="Share your experience (optional)"
-                />
+              <div class="srd__rf-field">
+                <app-input formControlName="comment" label="Comment" placeholder="Share your experience (optional)" />
               </div>
-
-              <div class="sr-detail-action-buttons">
+              <div class="srd__quote-actions">
                 <app-button type="submit" variant="primary" [disabled]="reviewForm.invalid || isActionLoading()">
                   {{ isActionLoading() ? 'Saving...' : 'Save Review' }}
                 </app-button>
@@ -281,85 +511,92 @@
                 </app-button>
               </div>
             </form>
+
           } @else {
-            <div class="sr-detail-body sr-review-display">
-              <div class="sr-review-header" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
-                <div class="sr-review-rating">{{ getRatingStars() }}</div>
-                <div class="sr-review-meta" style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px;">
-                  <span class="sr-review-customer">{{ review()!.customer?.name ?? 'Customer' }}</span>
-                  <span class="sr-review-time">{{ review()!.createdAt | date: 'medium' }}</span>
+            <!-- Review display -->
+            <div class="srd__review-display">
+              <div class="srd__review-top">
+                <div class="srd__review-stars" aria-label="Rating: {{ review()!.rating }} out of 5">
+                  @for (star of [1, 2, 3, 4, 5]; track $index) {
+                    <span class="srd__review-star" [class.srd__review-star--filled]="review()!.rating >= star" aria-hidden="true">
+                      {{ review()!.rating >= star ? '★' : '☆' }}
+                    </span>
+                  }
+                </div>
+                <div class="srd__review-meta">
+                  <span class="srd__review-customer">{{ review()!.customer?.name ?? 'Customer' }}</span>
+                  <span class="srd__review-date">{{ review()!.createdAt | date:'d MMM yyyy' }}</span>
                 </div>
               </div>
               @if (review()!.comment) {
-                <p class="sr-review-comment">{{ review()!.comment }}</p>
+                <p class="srd__review-comment">{{ review()!.comment }}</p>
               }
               @if (canEditReview()) {
-                <div class="sr-detail-action-buttons">
-                  <app-button type="button" variant="outline" size="sm" (click)="startEditReview()" [disabled]="isActionLoading()">
+                <div class="srd__review-edit-actions">
+                  <button type="button" class="srd__btn srd__btn--sm srd__btn--ghost" (click)="startEditReview()" [disabled]="isActionLoading()">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                     Edit
-                  </app-button>
-                  <app-button type="button" variant="outline" size="sm" (click)="startDeleteReview()" [disabled]="isActionLoading()">
+                  </button>
+                  <button type="button" class="srd__btn srd__btn--sm srd__btn--danger-outline" (click)="startDeleteReview()" [disabled]="isActionLoading()">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
                     Delete
-                  </app-button>
+                  </button>
                 </div>
               }
             </div>
           }
-           @if (isConfirmingDeleteReview()) {
-            <div class="sr-cancel-confirm">
-              <p class="sr-cancel-confirm__text">Are you sure you want to delete this review?</p>
-              <div class="sr-cancel-confirm__buttons">
-                <app-button type="button" variant="primary" (click)="confirmDeleteReview()" [disabled]="isActionLoading()">
-                  {{ isActionLoading() ? 'Deleting...' : 'Yes, Delete' }}
-                </app-button>
-                <app-button type="button" variant="outline" (click)="cancelDeleteReview()" [disabled]="isActionLoading()">
-                  Cancel
-                </app-button>
+
+          <!-- Delete review confirmation -->
+          @if (isConfirmingDeleteReview()) {
+            <div class="srd__confirm srd__confirm--danger" role="alertdialog" aria-labelledby="del-review-title">
+              <div class="srd__confirm-icon" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+              </div>
+              <div class="srd__confirm-body">
+                <p class="srd__confirm-title" id="del-review-title">Delete this review?</p>
+                <p class="srd__confirm-desc">This action cannot be undone.</p>
+                <div class="srd__confirm-actions">
+                  <button type="button" class="srd__btn srd__btn--danger" (click)="confirmDeleteReview()" [disabled]="isActionLoading()">
+                    {{ isActionLoading() ? 'Deleting...' : 'Yes, Delete' }}
+                  </button>
+                  <button type="button" class="srd__btn srd__btn--ghost" (click)="cancelDeleteReview()" [disabled]="isActionLoading()">
+                    Keep Review
+                  </button>
+                </div>
               </div>
             </div>
           }
+
         } @else if (canCreateReview()) {
-          <form [formGroup]="reviewForm" (ngSubmit)="submitReview()" class="sr-review-form" autocomplete="off" novalidate>
-            <div class="sr-review-form__rating">
-              <label class="sr-detail-label">Rating</label>
-              <div style="display: flex; gap: 4px; cursor: pointer; user-select: none;" (click)="reviewRatingCtrl.markAsTouched()">
+          <!-- Create review form -->
+          <form [formGroup]="reviewForm" (ngSubmit)="submitReview()" autocomplete="off" novalidate class="srd__review-form">
+            <p class="srd__review-prompt">How was your service experience?</p>
+            <div class="srd__rf-field">
+              <label class="srd__qlabel" id="new-rating-label">Rating <span class="srd__req">*</span></label>
+              <div class="srd__stars" role="group" aria-labelledby="new-rating-label" (click)="reviewRatingCtrl.markAsTouched()">
                 @for (star of [1, 2, 3, 4, 5]; track $index) {
-                  <span
-                    type="button"
-                    (click)="rateStar(star - 1)"
-                    [attr.data-rating]="star"
-                    [style.color]="reviewForm.value.rating >= star ? 'var(--color-warning)' : 'var(--color-text-secondary)'"
-                  >
+                  <button type="button" class="srd__star srd__star--lg" [class.srd__star--filled]="reviewForm.value.rating >= star" (click)="rateStar(star - 1)" [attr.aria-label]="star + ' star'" [attr.data-rating]="star">
                     {{ reviewForm.value.rating >= star ? '★' : '☆' }}
-                  </span>
+                  </button>
                 }
               </div>
               @if (reviewRatingCtrl.touched && reviewRatingCtrl.invalid) {
-                <span style="font-size: 12px; color: var(--color-danger);">Please select a rating between 1 and 5</span>
+                <span class="srd__qerr" role="alert">Please select a rating between 1 and 5</span>
               }
             </div>
-
-            <div class="sr-quote-form__field">
-              <app-input
-                formControlName="comment"
-                label="Comment"
-                placeholder="Share your experience (optional)"
-              />
+            <div class="srd__rf-field">
+              <app-input formControlName="comment" label="Comment" placeholder="Share your experience (optional)" />
             </div>
-
-            <div class="sr-detail-action-buttons">
+            <div class="srd__quote-actions">
               <app-button type="submit" variant="primary" [disabled]="reviewForm.invalid || isActionLoading()">
                 {{ isActionLoading() ? 'Submitting...' : 'Submit Review' }}
               </app-button>
             </div>
           </form>
         }
-      </app-card>
+      </section>
     }
 
-  <div class="sr-back-button">
-    <app-button type="button" variant="outline" (click)="goBack()">
-      Back to Service Requests
-    </app-button>
-  </div>
+  }
+
 </div>
